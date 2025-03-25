@@ -1,0 +1,37 @@
+import { NavLink } from 'react-router'
+import Button from './Button'
+
+export default function Header() {
+  return (
+    <header className="w-screen bg-white flex justify-between p-8">
+      <nav className="flex justify-between items-center w-[92%] mx-auto">
+        <div>
+          <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
+        </div>
+        <div className="">
+          <ul className="flex items-center gap-[4vw]">
+            <li>
+              <NavLink to="/about" className="hover:text-[#DB4E1E]">
+                Sobre
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/services" className="hover:text-[#DB4E1E]">
+                Serviços
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/FAQ" className="hover:text-[#DB4E1E]">
+                FAQ
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <Button className="mr-1">Área do Cliente</Button>
+          <Button className="ml-1">Área do Parceiro</Button>
+        </div>
+      </nav>
+    </header>
+  )
+}

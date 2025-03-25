@@ -1,8 +1,18 @@
+import { BrowserRouter, Route, Routes } from 'react-router'
+import { About, Client, FAQ, Partner, Services, Home } from './pages'
+
 function App() {
   return (
-    <div className="bg-[#513628]">
-      <h1 className="text-white">Hello World</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/FAQ" element={<FAQ />} />
+        <Route path="/client" element={<Client />} />
+        <Route path="/partner" element={<Partner />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
