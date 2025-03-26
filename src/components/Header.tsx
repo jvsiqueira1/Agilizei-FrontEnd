@@ -6,7 +6,9 @@ export default function Header() {
     <header className="w-screen bg-white flex justify-between p-8">
       <nav className="flex justify-between items-center w-[92%] mx-auto">
         <div>
-          <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
+          <NavLink to="/">
+            <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
+          </NavLink>
         </div>
         <div className="">
           <ul className="flex items-center gap-[4vw]">
