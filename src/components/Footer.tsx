@@ -2,7 +2,7 @@ import { FaInstagram } from 'react-icons/fa'
 
 export default function Footer() {
   return (
-    <footer className="bg-white px-4 md:px-16 lg:px-36 w-[92%] mx-auto">
+    <footer className="bg-white px-4 md:px-16 lg:px-36 w-[92%] mx-auto mb-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
           <img src="agilizeiLogo.svg" alt="Agilizei Logo" className="mb-4" />
