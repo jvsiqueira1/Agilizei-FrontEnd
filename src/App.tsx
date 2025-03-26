@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
-import { About, Client, FAQ, Partner, Services, Home } from './pages'
+import { About, FAQ, Services, Home } from './pages'
 
 function App() {
   return (
@@ -9,8 +9,6 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
         <Route path="/FAQ" element={<FAQ />} />
-        <Route path="/client" element={<Client />} />
-        <Route path="/partner" element={<Partner />} />
       </Routes>
     </BrowserRouter>
   )
