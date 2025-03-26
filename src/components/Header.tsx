@@ -11,17 +11,17 @@ export default function Header() {
         <div className="">
           <ul className="flex items-center gap-[4vw]">
             <li>
-              <NavLink to="/about" className="hover:text-[#DB4E1E]">
+              <NavLink to="/about" className="hover:text-orange">
                 Sobre
               </NavLink>
             </li>
             <li>
-              <NavLink to="/services" className="hover:text-[#DB4E1E]">
+              <NavLink to="/services" className="hover:text-orange">
                 Serviços
               </NavLink>
             </li>
             <li>
-              <NavLink to="/FAQ" className="hover:text-[#DB4E1E]">
+              <NavLink to="/FAQ" className="hover:text-orange">
                 FAQ
               </NavLink>
             </li>
