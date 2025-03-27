@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
-import { About, FAQ, Services, Home } from './pages'
+import { About, FAQ, Services, Home } from '@/pages'
 
 function App() {
   return (
