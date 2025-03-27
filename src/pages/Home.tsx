@@ -1,9 +1,11 @@
-import Header from '../components/Header'
-import Footer from '../components/Footer'
-import Button from '../components/Button'
-import { useEffect } from 'react'
+import { Footer, Header, Modal, ClientForm, PartnerForm } from '@/components'
+import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
+  const [openBudgetModal, setBudgetModal] = useState(false)
+  const [openPartnerModal, setPartnerModal] = useState(false)
+
   useEffect(() => {
     document.body.style.overflowX = 'hidden'
 
@@ -19,12 +21,24 @@ export default function Home() {
           Conectando você aos melhores profissionais do mercado
         </h1>
         <div className="flex flex-wrap gap-4">
-          <Button className="bg-orange text-white border-none hover:bg-light-orange">
+          <Button onClick={() => setBudgetModal(true)}>
             FAÇA SEU ORÇAMENTO
           </Button>
-          <Button className="bg-orange text-white border-none hover:bg-light-orange">
+          <Modal
+            isVisible={openBudgetModal}
+            onClose={() => setBudgetModal(false)}
+          >
+            <ClientForm />
+          </Modal>
+          <Button onClick={() => setPartnerModal(true)}>
             SEJA NOSSO PARCEIRO
           </Button>
+          <Modal
+            isVisible={openPartnerModal}
+            onClose={() => setPartnerModal(false)}
+          >
+            <PartnerForm />
+          </Modal>
         </div>
       </section>
       <Footer />

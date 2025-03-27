@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router'
-import { Button, Modal, Input } from './index'
+import { Modal } from '@/components'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 export default function Header() {
   const [openClientModal, setClientModal] = useState(false)
@@ -33,8 +35,8 @@ export default function Header() {
             </li>
           </ul>
         </div>
-        <div>
-          <Button className="mr-1" onClick={() => setClientModal(true)}>
+        <div className="flex gap-4">
+          <Button onClick={() => setClientModal(true)} variant={'outline'}>
             Área do Cliente
           </Button>
           <Modal
@@ -51,15 +53,12 @@ export default function Header() {
                 <label>Digite seu telefone</label>
                 <Input type="tel" placeholder="Telefone" required />
               </div>
-              <Button
-                className="bg-orange w-56 rounded-2xl text-white border-none hover:bg-light-orange"
-                type="submit"
-              >
+              <Button type="submit" className="w-48">
                 Entrar
               </Button>
             </div>
           </Modal>
-          <Button className="ml-1" onClick={() => setPartnerModal(true)}>
+          <Button onClick={() => setPartnerModal(true)} variant={'outline'}>
             Área do Parceiro
           </Button>
           <Modal
@@ -76,10 +75,7 @@ export default function Header() {
                 <label>Digite seu telefone</label>
                 <Input type="tel" placeholder="Telefone" required />
               </div>
-              <Button
-                className="bg-orange w-56 rounded-2xl text-white border-none hover:bg-light-orange"
-                type="submit"
-              >
+              <Button type="submit" className="w-48">
                 Entrar
               </Button>
             </div>
