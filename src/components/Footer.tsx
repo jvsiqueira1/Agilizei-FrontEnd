@@ -22,7 +22,11 @@ export default function Footer() {
             alt="Agilizei Logo"
             className="mb-4 mt-1"
           />
-          <p className="text-gray">© 2025 DNC. All rights reserved.</p>
+          <p className="text-gray">
+            {' '}
+            © {new Date().getFullYear()} Agilizei. Todos os direitos
+            reservados.
+          </p>
         </div>
         <div className="mb-4">
           <h2 className="text-lg font-bold mb-4">Contato</h2>
