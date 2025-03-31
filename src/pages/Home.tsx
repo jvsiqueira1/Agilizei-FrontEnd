@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <section className="flex flex-col items-center justify-center min-h-screen text-center overflow-x-hidden max-w-full">
+      <section className="bg-light-gray flex flex-col items-center justify-center min-h-screen text-center overflow-x-hidden max-w-full">
         <h1 className="text-xl md:text-2xl font-semibold leading-snug mb-16">
           Conectando você aos melhores profissionais do mercado
         </h1>
