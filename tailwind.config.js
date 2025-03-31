@@ -16,6 +16,7 @@ export default {
         warning: '#CBC400',
         alert: '#BB0003',
         gray: '#666666',
+        'light-gray': '#EAEDED',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

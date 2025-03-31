@@ -174,7 +174,14 @@ export default function PartnerForm() {
             <FormItem>
               <FormLabel>Verificação de Identidade</FormLabel>
               <FormControl>
-                <Input type="file" accept="image/png, image/jpg" {...field} />
+                <input
+                  type="file"
+                  accept="image/png, image/jpg"
+                  className="block w-full text-sm text-gray-500
+                    file:py-2 file:px-4 file:rounded-md file:border file:border-gray-300
+                    file:bg-gray-50 file:text-gray-700 file:cursor-pointer"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
