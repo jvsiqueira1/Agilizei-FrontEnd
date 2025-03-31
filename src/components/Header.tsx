@@ -3,19 +3,16 @@ import { NavLink } from 'react-router'
 import { Modal } from '@/components'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Menu } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+import { useMenu } from '@/contexts/useMenu'
 
 export default function Header() {
   const [openClientModal, setClientModal] = useState(false)
   const [openPartnerModal, setPartnerModal] = useState(false)
-
-  const navLinks = document.querySelector('.nav-links')
-  function onToggleMenu() {
-    navLinks?.classList.toggle('top-[9%]')
-  }
+  const { openMenu, toggleMenu } = useMenu()
 
   return (
-    <header className="w-screen bg-light-gray flex justify-between p-8">
+    <header className="w-screen bg-light-gray flex justify-between p-8 z-50">
       <nav className="flex justify-between items-center w-[92%] mx-auto">
         <div>
           <NavLink to="/">
@@ -26,7 +23,9 @@ export default function Header() {
             />
           </NavLink>
         </div>
-        <div className="nav-links md:static absolute bg-light-gray md:min-h-fit min-h-[40vh] left-0 top-[-100%] md:w-auto w-full flex items-center px-5">
+        <div
+          className={`md:static absolute bg-light-gray md:min-h-fit min-h-[40vh] left-0 md:w-auto w-full flex items-center px-5 z-40 ${openMenu ? 'top-20 left-0 opacity-100 visible' : '-left-full top-20 opacity-0 invisible'} transition-all duration-300 ease-in-out`}
+        >
           <ul className="flex md:flex-row flex-col md:items-center md:gap-[4vw] gap-8 mt-6">
             <li>
               <NavLink to="/">
@@ -111,12 +110,12 @@ export default function Header() {
           </ul>
         </div>
         <div className="flex items-center gap-4">
-          <Button
-            className="md:hidden"
-            variant={'ghost'}
-            onClick={onToggleMenu}
-          >
-            <Menu className="text-3xl" />
+          <Button className="md:hidden" variant={'ghost'} onClick={toggleMenu}>
+            {openMenu ? (
+              <X className="text-3xl" />
+            ) : (
+              <Menu className="text-3xl " />
+            )}
           </Button>
         </div>
       </nav>

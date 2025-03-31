@@ -1,10 +1,12 @@
 import { Footer, Header, Modal, ClientForm, PartnerForm } from '@/components'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useMenu } from '@/contexts/useMenu'
 
 export default function Home() {
   const [openBudgetModal, setBudgetModal] = useState(false)
   const [openPartnerModal, setPartnerModal] = useState(false)
+  const { openMenu } = useMenu()
 
   useEffect(() => {
     document.body.style.overflowX = 'hidden'
@@ -16,7 +18,9 @@ export default function Home() {
   return (
     <>
       <Header />
-      <section className="bg-light-gray flex flex-col items-center justify-center min-h-screen text-center overflow-x-hidden max-w-full">
+      <section
+        className={`bg-light-gray flex flex-col items-center justify-center min-h-screen text-center overflow-x-hidden max-w-full ${openMenu ? 'blur-sm pointer-events-none select-none' : ''}`}
+      >
         <h1 className="text-xl md:text-2xl font-semibold leading-snug mb-16">
           Conectando você aos melhores profissionais do mercado
         </h1>
