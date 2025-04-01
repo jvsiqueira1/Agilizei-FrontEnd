@@ -9,7 +9,7 @@ import { useMenu } from '@/contexts/useMenu'
 export default function Header() {
   const [openClientModal, setClientModal] = useState(false)
   const [openPartnerModal, setPartnerModal] = useState(false)
-  const { openMenu, toggleMenu } = useMenu()
+  const { openMenu, toggleMenu, closeMenu } = useMenu()
   useEffect(() => {
     document.body.style.overflowX = 'hidden'
 
@@ -31,7 +31,7 @@ export default function Header() {
           </NavLink>
         </div>
         <div
-          className={`flex items-center px-5 md:static md:flex-row md:h-auto md:min-h-fit md:w-auto md:top-auto md:left-auto fixed top-0 left-0 h-screen w-[70%] max-w-sm flex-col bg-light-gray z-40 transition-all duration-300 ease-in-out ${openMenu ? 'left-0 opacity-100 visible' : 'md:opacity-100 md:visible -left-full opacity-0 invisible'}`}
+          className={`flex items-center px-5 md:static md:flex-row md:h-auto md:min-h-fit md:w-auto md:top-auto md:left-auto fixed top-0 left-0 h-screen w-[70%] max-w-sm flex-col bg-light-gray max-md:z-40 transition-all duration-300 ease-in-out ${openMenu ? 'left-0 opacity-100 visible' : 'md:opacity-100 md:visible -left-full opacity-0 invisible'}`}
         >
           <ul className="flex md:flex-row flex-col md:items-center md:gap-[4vw] gap-8 mt-6">
             <li>
@@ -40,7 +40,7 @@ export default function Header() {
                   className="w-32 mt-4"
                   src="agilizeiLogo.svg"
                   alt="Agilizei Logo"
-                  onClick={toggleMenu}
+                  onClick={closeMenu}
                 />
               </NavLink>
             </li>
@@ -48,7 +48,7 @@ export default function Header() {
               <NavLink
                 to="/about"
                 className="hover:text-orange"
-                onClick={toggleMenu}
+                onClick={closeMenu}
               >
                 Sobre
               </NavLink>
@@ -57,7 +57,7 @@ export default function Header() {
               <NavLink
                 to="/services"
                 className="hover:text-orange"
-                onClick={toggleMenu}
+                onClick={closeMenu}
               >
                 Serviços
               </NavLink>
@@ -66,7 +66,7 @@ export default function Header() {
               <NavLink
                 to="/FAQ"
                 className="hover:text-orange"
-                onClick={toggleMenu}
+                onClick={closeMenu}
               >
                 FAQ
               </NavLink>
