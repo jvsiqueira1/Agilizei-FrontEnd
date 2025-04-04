@@ -19,7 +19,7 @@ export default function Header() {
   }, [])
 
   return (
-    <header className="w-screen bg-light-gray flex justify-between p-8 z-50">
+    <header className="w-screen bg-light-gray flex justify-between p-8 z-50 border-b-2">
       <nav className="flex justify-between items-center w-[92%] mx-auto">
         <div>
           <NavLink to="/">
@@ -123,7 +123,7 @@ export default function Header() {
         </div>
       </nav>
       <Modal isVisible={openClientModal} onClose={() => setClientModal(false)}>
-        <div className="flex flex-col justify-center items-center gap-6">
+        <div className="flex flex-col justify-center items-center gap-6 overflow-hidden">
           <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
           <div className="flex flex-col gap-2">
             <label>Digite seu nome</label>

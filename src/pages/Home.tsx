@@ -19,12 +19,19 @@ export default function Home() {
     <>
       <Header />
       <section
-        className={`bg-light-gray flex flex-col items-center justify-center min-h-screen text-center overflow-x-hidden max-w-full ${openMenu ? 'blur-sm pointer-events-none select-none' : ''}`}
+        className={`bg-light-gray flex flex-col items-center justify-center min-h-svh text-center overflow-x-hidden w-full max-w-full ${openMenu ? 'blur-sm pointer-events-none select-none' : ''}`}
       >
+        <div className="md:w-1/2 p-4 flex justify-center mb-16">
+          <img
+            src="agilizei.png"
+            alt="Descrição da imagem"
+            className="rounded-lg w-48 h-48"
+          />
+        </div>
         <h1 className="text-xl md:text-2xl font-semibold leading-snug mb-16">
           Conectando você aos melhores profissionais do mercado
         </h1>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-2 md:gap-4">
           <Button onClick={() => setBudgetModal(true)}>
             FAÇA SEU ORÇAMENTO
           </Button>
