@@ -128,10 +128,6 @@ export default function Header() {
         <div className="flex flex-col justify-center items-center gap-6 overflow-hidden">
           <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
           <div className="flex flex-col gap-2">
-            <label>Digite seu nome</label>
-            <Input type="text" placeholder="Nome" required />
-          </div>
-          <div className="flex flex-col gap-2">
             <label>Digite seu telefone</label>
             <Input type="tel" placeholder="Telefone" required />
           </div>
@@ -147,10 +143,6 @@ export default function Header() {
       >
         <div className="flex flex-col justify-center items-center gap-6">
           <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
-          <div className="flex flex-col gap-2">
-            <label>Digite seu nome</label>
-            <Input type="text" placeholder="Nome" required />
-          </div>
           <div className="flex flex-col gap-2">
             <label>Digite seu telefone</label>
             <Input type="tel" placeholder="Telefone" required />
