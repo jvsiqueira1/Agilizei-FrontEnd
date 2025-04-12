@@ -19,7 +19,7 @@ export default function Header() {
   }, [])
 
   return (
-    <header className="w-screen bg-light-gray flex justify-between p-8 z-50 border-b-2">
+    <header className="w-screen max-w-[1440px] mx-auto bg-light-gray flex justify-between py-8 z-50 border-b-2">
       <nav className="relative flex justify-between items-center w-[92%] mx-auto">
         <div>
           <NavLink to="/">

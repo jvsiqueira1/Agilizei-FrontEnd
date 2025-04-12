@@ -25,7 +25,7 @@ import { useState } from 'react'
 import SpecificFields from './SpecificFields'
 import { IMaskInput } from 'react-imask'
 
-export default function ClientForm() {
+export default function ClientForm({ telefone }: { telefone?: string }) {
   const [servicoSlecionado, setServicoSelecionado] = useState('')
 
   const form = useForm<ClientFormData>({
@@ -84,6 +84,7 @@ export default function ClientForm() {
                       placeholder="(27) 98876-5432"
                       className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
                       onAccept={(value: string) => field.onChange(value)}
+                      value={telefone}
                     />
                   </FormControl>
                   <FormMessage />

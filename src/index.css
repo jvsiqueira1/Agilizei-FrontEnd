@@ -59,6 +59,9 @@
 
 * {
   @apply scrollbar-thin scrollbar-thumb-muted-foreground scrollbar-track-transparent;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 @layer base {

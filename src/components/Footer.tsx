@@ -13,9 +13,9 @@ export default function Footer() {
   }, [])
   return (
     <footer
-      className={`bg-light-gray p-6 md:px-16 lg:px-36 mx-auto overflow-x-hidden border-t-2 ${openMenu ? 'blur-sm pointer-events-none select-none' : ''}`}
+      className={`bg-light-gray max-w-[1440px] mx-auto p-6 md:px-16 lg:mx-auto overflow-x-hidden border-t-2 ${openMenu ? 'blur-sm pointer-events-none select-none' : ''}`}
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:pl-32">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:pl-32 lg:pl-0 items-center">
         <div>
           <img
             src="agilizeiLogo.svg"

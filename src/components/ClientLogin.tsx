@@ -8,26 +8,44 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import { api } from '@/services/api'
+import Modal from './Modal'
+import { ClientForm } from '.'
 
 interface Props {
   onClose: () => void
 }
 
 export default function ClientLogin({ onClose }: Props) {
+  const [openBudgetModal, setBudgetModal] = useState(false)
   const [telefone, setTelefone] = useState('')
   const [step, setStep] = useState<'telefone' | 'otp'>('telefone')
   const [codigo, setCodigo] = useState('')
   const [mensagem, setMensagem] = useState('')
   const navigate = useNavigate()
 
-  const enviarCodigo = async () => {
-    const telefoneLimpo = '55' + telefone.replace(/\D/g, '')
+  //Verificar se o usuário existe no banco de dados
+  const verificarUsuario = async (telefoneCliente: string) => {
+    try {
+      const telefoneLimpo = '55' + telefoneCliente.replace(/\D/g, '')
+      const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
+      console.log(data.data.telefone)
+      if (data) {
+        return enviarCodigo(data.data.telefone)
+      }
+    } catch (e) {
+      console.log(e)
+      setBudgetModal(true)
+    }
+  }
+  const enviarCodigo = async (telefoneCliente: string) => {
+    const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
+    console.log('enviar codigo ' + telefoneLimpo)
     try {
       const { data } = await api.post('/auth/enviar-otp', {
         telefone: telefoneLimpo,
-        //tipo: 'cliente',
+        tipo: 'cliente',
       })
-
+      console.log(data)
       if (data.sucesso) {
         setStep('otp')
         setMensagem('Código enviado para seu WhatsApp')
@@ -84,7 +102,7 @@ export default function ClientLogin({ onClose }: Props) {
             className="border border-input bg-background text-sm rounded-md px-3 py-2 w-full"
           />
           <Button
-            onClick={enviarCodigo}
+            onClick={() => verificarUsuario(telefone)}
             className="w-full"
             disabled={telefone.replace(/\D/g, '').length < 11}
           >
@@ -118,6 +136,9 @@ export default function ClientLogin({ onClose }: Props) {
       {mensagem && (
         <p className="text-sm text-muted-foreground text-center">{mensagem}</p>
       )}
+      <Modal isVisible={openBudgetModal} onClose={() => setBudgetModal(false)}>
+        <ClientForm telefone={telefone} />
+      </Modal>
     </div>
   )
 }
