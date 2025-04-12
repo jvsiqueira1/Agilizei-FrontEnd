@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
+import { IMaskInput } from 'react-imask'
 
 export default function PartnerForm() {
   const form = useForm({
@@ -128,7 +129,13 @@ export default function PartnerForm() {
             <FormItem>
               <FormLabel>Telefone</FormLabel>
               <FormControl>
-                <Input placeholder="Telefone" {...field} />
+                <IMaskInput
+                  {...field}
+                  mask="(00) 00000-0000"
+                  placeholder="(27) 98876-5432"
+                  className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                  onAccept={(value: string) => field.onChange(value)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

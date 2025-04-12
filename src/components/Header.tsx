@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router'
 import { Modal } from '@/components'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
 import { useMenu } from '@/contexts/useMenu'
+import { ClientLogin, PartnerLogin } from '@/components'
 
 export default function Header() {
   const [openClientModal, setClientModal] = useState(false)
@@ -125,32 +125,14 @@ export default function Header() {
         </div>
       </nav>
       <Modal isVisible={openClientModal} onClose={() => setClientModal(false)}>
-        <div className="flex flex-col justify-center items-center gap-6 overflow-hidden">
-          <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
-          <div className="flex flex-col gap-2">
-            <label>Digite seu telefone</label>
-            <Input type="tel" placeholder="Telefone" required />
-          </div>
-          <Button type="submit" className="w-48">
-            Entrar
-          </Button>
-        </div>
+        <ClientLogin onClose={() => setClientModal(false)} />
       </Modal>
 
       <Modal
         isVisible={openPartnerModal}
         onClose={() => setPartnerModal(false)}
       >
-        <div className="flex flex-col justify-center items-center gap-6">
-          <img src="agilizeiLogo.svg" alt="Agilizei Logo" />
-          <div className="flex flex-col gap-2">
-            <label>Digite seu telefone</label>
-            <Input type="tel" placeholder="Telefone" required />
-          </div>
-          <Button type="submit" className="w-48">
-            Entrar
-          </Button>
-        </div>
+        <PartnerLogin onClose={() => setPartnerModal(false)} />
       </Modal>
     </header>
   )

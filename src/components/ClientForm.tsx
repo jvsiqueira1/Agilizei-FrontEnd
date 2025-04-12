@@ -18,9 +18,17 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
+import { criarOrcamento } from '@/services/orcamento'
+import { ClientFormData } from '@/types'
+import { Controller } from 'react-hook-form'
+import { useState } from 'react'
+import SpecificFields from './SpecificFields'
+import { IMaskInput } from 'react-imask'
 
 export default function ClientForm() {
-  const form = useForm({
+  const [servicoSlecionado, setServicoSelecionado] = useState('')
+
+  const form = useForm<ClientFormData>({
     defaultValues: {
       telefone: '',
       servico: '',
@@ -35,14 +43,23 @@ export default function ClientForm() {
       cidade: '',
       estado: '',
       descricao: '',
-      foto: undefined,
+      foto: null,
     },
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function onSubmit(data: any) {
-    console.log('Formulario CLiente: ', data)
+  const servicosComDescricaoEspecifica = ['Eletricista', 'Pedreiro']
+
+  const onSubmit = async (data: ClientFormData) => {
+    try {
+      const result = await criarOrcamento(data)
+      console.log('Orçamento enviado com sucesso: ', result)
+      alert('Orçamento enviado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao enviar orçamento: ', error)
+      alert('Erro ao enviar orçamento.')
+    }
   }
+
   return (
     <div className="flex flex-col items-center">
       <img
@@ -61,7 +78,13 @@ export default function ClientForm() {
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Telefone" {...field} />
+                    <IMaskInput
+                      {...field}
+                      mask="(00) 00000-0000"
+                      placeholder="(27) 98876-5432"
+                      className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                      onAccept={(value: string) => field.onChange(value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -71,13 +94,16 @@ export default function ClientForm() {
             <FormField
               control={form.control}
               name="servico"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Serviço</FormLabel>
                   <FormControl>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={(value) => {
+                        form.setValue('servico', value)
+                        setServicoSelecionado(value)
+                      }}
+                      defaultValue={form.getValues('servico')}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Escolha o serviço" />
@@ -135,7 +161,13 @@ export default function ClientForm() {
                 <FormItem>
                   <FormLabel>Cep</FormLabel>
                   <FormControl>
-                    <Input placeholder="Cep" {...field} />
+                    <IMaskInput
+                      {...field}
+                      mask="00000-000"
+                      placeholder="29900-240"
+                      className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                      onAccept={(value: string) => field.onChange(value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -243,33 +275,38 @@ export default function ClientForm() {
             />
           </div>
 
-          <FormField
-            control={form.control}
-            name="descricao"
-            render={({ field }) => (
-              <FormItem>
-                <FormDescription className="mb-4">
-                  * Seu endereço será compartilhado apenas com um dos nossos
-                  parceiros após a sua confirmação do serviço.
-                </FormDescription>
-                <FormLabel>Descrição</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Informe a descrição do serviço"
-                    className="min-h-[100px]"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormDescription className="mb-4">
+            * Seu endereço será compartilhado apenas com um dos nossos parceiros
+            após a sua confirmação do serviço.
+          </FormDescription>
 
-          <div>
+          <SpecificFields servico={servicoSlecionado} control={form.control} />
+
+          {!servicosComDescricaoEspecifica.includes(servicoSlecionado) && (
             <FormField
               control={form.control}
-              name="foto"
+              name="descricao"
               render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição do serviço</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Informe a descrição do serviço"
+                      className="min-h-[100px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <div>
+            <Controller
+              control={form.control}
+              name="foto"
+              render={({ field: { onChange, ref } }) => (
                 <FormItem>
                   <FormLabel>Anexar Foto</FormLabel>
                   <FormControl>
@@ -279,7 +316,8 @@ export default function ClientForm() {
                       className="block w-full text-sm text-gray-500
                     file:py-2 file:px-4 file:rounded-md file:border file:border-gray-300
                     file:bg-gray-50 file:text-gray-700 file:cursor-pointer"
-                      {...field}
+                      onChange={(e) => onChange(e.target.files)}
+                      ref={ref}
                     />
                   </FormControl>
                   <FormMessage />

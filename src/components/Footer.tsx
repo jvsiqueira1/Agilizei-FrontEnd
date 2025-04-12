@@ -39,7 +39,9 @@ export default function Footer() {
           <h2 className="text-lg font-bold mb-4">Siga-nos</h2>
           <ul className="flex space-x-4">
             <li>
-              <FaInstagram />
+              <a href="https://www.instagram.com/agilizeiapp/" target="_blank">
+                <FaInstagram />
+              </a>
             </li>
           </ul>
         </div>
