@@ -26,15 +26,18 @@ export default function ClientLogin({ onClose }: Props) {
   //Verificar se o usuário existe no banco de dados
   const verificarUsuario = async (telefoneCliente: string) => {
     try {
+      console.log('verificarUsuario sujo', telefoneCliente)
       const telefoneLimpo = '55' + telefoneCliente.replace(/\D/g, '')
       const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
-      console.log(data.data.telefone)
+      console.log('dataUserVerificaUsuario', data.data.telefone)
       if (data) {
+        setStep('otp')
         return enviarCodigo(data.data.telefone)
+      } else {
+        setBudgetModal(true)
       }
     } catch (e) {
       console.log(e)
-      setBudgetModal(true)
     }
   }
   const enviarCodigo = async (telefoneCliente: string) => {
@@ -45,8 +48,7 @@ export default function ClientLogin({ onClose }: Props) {
         telefone: telefoneLimpo,
         tipo: 'cliente',
       })
-      console.log(data)
-      if (data.sucesso) {
+      if (data) {
         setStep('otp')
         setMensagem('Código enviado para seu WhatsApp')
       } else {
@@ -60,7 +62,8 @@ export default function ClientLogin({ onClose }: Props) {
   }
 
   const verificarCodigo = async () => {
-    const telefoneLimpo = '55' + telefone.replace(/\D/g, '')
+    const telefoneLimpo = telefone.replace(/\D/g, '')
+    console.log('verificar codigo ' + telefoneLimpo)
 
     try {
       const { data } = await api.post('/auth/verificar-otp', {
@@ -68,7 +71,7 @@ export default function ClientLogin({ onClose }: Props) {
         codigo,
       })
 
-      if (data.sucesso) {
+      if (data) {
         setMensagem('Login realizado com sucesso!')
 
         setTimeout(() => {
