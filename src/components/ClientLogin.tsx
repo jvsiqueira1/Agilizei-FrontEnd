@@ -33,6 +33,7 @@ export default function ClientLogin({ onClose }: Props) {
       const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
       console.log('dataUserVerificaUsuario', data.data.telefone)
       if (data) {
+        setStep('otp')
         return enviarCodigo(data.data.telefone)
       } else {
         setBudgetModal(true)
@@ -50,8 +51,7 @@ export default function ClientLogin({ onClose }: Props) {
         telefone: telefoneLimpo,
         tipo: 'cliente',
       })
-      console.log(data)
-      if (data.sucesso) {
+      if (data) {
         setStep('otp')
         setMensagem('Código enviado para seu WhatsApp')
       } else {
