@@ -10,6 +10,7 @@ import {
 import { api } from '@/services/api'
 import Modal from './Modal'
 import { ClientForm } from '.'
+import { useAuth } from '@/contexts/useAuth'
 
 interface Props {
   onClose: () => void
@@ -22,6 +23,7 @@ export default function ClientLogin({ onClose }: Props) {
   const [codigo, setCodigo] = useState('')
   const [mensagem, setMensagem] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   //Verificar se o usuário existe no banco de dados
   const verificarUsuario = async (telefoneCliente: string) => {
@@ -40,6 +42,7 @@ export default function ClientLogin({ onClose }: Props) {
       console.log(e)
     }
   }
+
   const enviarCodigo = async (telefoneCliente: string) => {
     const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
     console.log('enviar codigo ' + telefoneLimpo)
@@ -72,6 +75,7 @@ export default function ClientLogin({ onClose }: Props) {
       })
 
       if (data) {
+        login('client')
         setMensagem('Login realizado com sucesso!')
 
         setTimeout(() => {

@@ -1,3 +1,8 @@
+export { default as AdminClient } from './AdminClient'
+export { default as AdminLogin } from './AdminLogin'
+export { default as AdminPartner } from './AdminPartner'
+export { default as AdminServices } from './AdminServices'
+export { default as AdminSidebar } from './AdminSidebar'
 export { default as ClientForm } from './ClientForm'
 export { default as ClientLogin } from './ClientLogin'
 export { default as Footer } from './Footer'

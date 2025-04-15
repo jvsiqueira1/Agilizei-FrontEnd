@@ -4,6 +4,7 @@ import { IMaskInput } from 'react-imask'
 import { Button } from './ui/button'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from './ui/input-otp'
 import { api } from '@/services/api'
+import { useAuth } from '@/contexts/useAuth'
 
 interface Props {
   onClose: () => void
@@ -15,6 +16,7 @@ export default function PartnerLogin({ onClose }: Props) {
   const [codigo, setCodigo] = useState('')
   const [mensagem, setMensagem] = useState('')
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const enviarCodigo = async () => {
     const telefoneLimpo = telefone.replace(/\D/g, '')
@@ -53,6 +55,7 @@ export default function PartnerLogin({ onClose }: Props) {
         setMensagem('Login realizado com sucesso!')
         setTimeout(() => {
           onClose()
+          login('partner')
           navigate('/partner')
         }, 1500)
       } else {
