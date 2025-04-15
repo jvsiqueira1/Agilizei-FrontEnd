@@ -28,15 +28,17 @@ export default function ClientLogin({ onClose }: Props) {
   //Verificar se o usuário existe no banco de dados
   const verificarUsuario = async (telefoneCliente: string) => {
     try {
+      console.log('verificarUsuario sujo', telefoneCliente)
       const telefoneLimpo = '55' + telefoneCliente.replace(/\D/g, '')
       const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
-      console.log(data.data.telefone)
+      console.log('dataUserVerificaUsuario', data.data.telefone)
       if (data) {
         return enviarCodigo(data.data.telefone)
+      } else {
+        setBudgetModal(true)
       }
     } catch (e) {
       console.log(e)
-      setBudgetModal(true)
     }
   }
 
@@ -63,7 +65,8 @@ export default function ClientLogin({ onClose }: Props) {
   }
 
   const verificarCodigo = async () => {
-    const telefoneLimpo = '55' + telefone.replace(/\D/g, '')
+    const telefoneLimpo = telefone.replace(/\D/g, '')
+    console.log('verificar codigo ' + telefoneLimpo)
 
     try {
       const { data } = await api.post('/auth/verificar-otp', {
@@ -71,7 +74,7 @@ export default function ClientLogin({ onClose }: Props) {
         codigo,
       })
 
-      if (data.sucesso) {
+      if (data) {
         login('client')
         setMensagem('Login realizado com sucesso!')
 
