@@ -1,6 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { About, Admin, FAQ, Services, Home, Client, Partner } from '@/pages'
-import { AdminClient, AdminPartner, AdminServices } from '@/components'
+import {
+  AdminClient,
+  AdminPartner,
+  AdminServices,
+  AdminServicesType,
+} from '@/components'
 import { PrivateRoute } from '@/contexts/PrivateRoute'
 
 function App() {
@@ -22,6 +27,7 @@ function App() {
           <Route path="funcionarios" element={<AdminPartner />} />
           <Route path="clientes" element={<AdminClient />} />
           <Route path="servicos" element={<AdminServices />} />
+          <Route path="tipos" element={<AdminServicesType />} />
         </Route>
         <Route
           path="/client"

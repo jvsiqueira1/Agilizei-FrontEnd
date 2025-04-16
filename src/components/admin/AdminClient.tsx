@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table'
 import { api } from '@/services/api'
 import { useEffect, useState } from 'react'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 import { Modal } from '@/components'
 
 interface Client {

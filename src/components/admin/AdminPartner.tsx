@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table'
 import { api } from '@/services/api'
 import { useEffect, useState } from 'react'
-import { Switch } from './ui/switch'
+import { Switch } from '../ui/switch'
 
 interface Parceiro {
   id: number

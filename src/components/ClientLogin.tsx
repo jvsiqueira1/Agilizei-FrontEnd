@@ -29,7 +29,7 @@ export default function ClientLogin({ onClose }: Props) {
   const verificarUsuario = async (telefoneCliente: string) => {
     try {
       console.log('verificarUsuario sujo', telefoneCliente)
-      const telefoneLimpo = '55' + telefoneCliente.replace(/\D/g, '')
+      const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
       const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
       console.log('dataUserVerificaUsuario', data.data.telefone)
       if (data) {

@@ -38,6 +38,16 @@ const AdminSidebar = () => {
           Serviços
         </Button>
       </NavLink>
+      <NavLink
+        to="/admin/tipos"
+        className={({ isActive }) =>
+          isActive ? 'text-primary font-semibold' : 'text-muted-foreground'
+        }
+      >
+        <Button variant="ghost" className="w-full justify-start">
+          Tipos de Serviços
+        </Button>
+      </NavLink>
     </aside>
   )
 }
