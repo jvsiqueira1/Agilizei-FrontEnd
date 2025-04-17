@@ -13,6 +13,11 @@ interface TipoServico {
   active: boolean
 }
 
+interface AddTipoServico {
+  nome: string
+  descricao: string
+}
+
 export default function AdminServicesType() {
   const [tiposServico, setTiposServico] = useState<TipoServico[]>([])
   const [tiposServicoModal, setTiposServicoModal] = useState(false)
@@ -22,6 +27,10 @@ export default function AdminServicesType() {
     useState<TipoServico | null>(null)
   const [editNome, setEditNome] = useState('')
   const [editDescricao, setEditDescricao] = useState('')
+  const [addService, setAddService] = useState<AddTipoServico>({
+    nome: '',
+    descricao: '',
+  })
 
   useEffect(() => {
     fetchTipoServico()
@@ -49,12 +58,20 @@ export default function AdminServicesType() {
 
   const handleAddService = async () => {
     try {
-      api.post('/tipos-servico')
+      api.post('/tipos-servico', addService)
       setTiposServicoModal(false)
       fetchTipoServico()
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target
+    setAddService({
+      ...addService,
+      [name]: value,
+    })
   }
 
   const openEditModal = (tipo: TipoServico) => {
@@ -154,11 +171,19 @@ export default function AdminServicesType() {
         isVisible={tiposServicoModal}
         onClose={() => setTiposServicoModal(false)}
       >
-        <form action={handleAddService}>
+        <form onSubmit={handleAddService}>
           <h2 className="mb-4 text-center font-bold">Adicionar novo serviço</h2>
           <div className="grid grid-flow-row gap-4">
-            <Input placeholder="Nome do serviço" />
-            <Input placeholder="Descrição do serviço" />
+            <Input
+              placeholder="Nome do serviço"
+              onChange={handleInputChange}
+              name="nome"
+            />
+            <Input
+              placeholder="Descrição do serviço"
+              onChange={handleInputChange}
+              name="descricao"
+            />
             <Button type="submit">Adicionar novo serviço</Button>
           </div>
         </form>

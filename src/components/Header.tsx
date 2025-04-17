@@ -29,12 +29,12 @@ export default function Header() {
         <div className="hidden md:flex absolute left-[50%] -translate-x-[54%]">
           <ul className="flex flex-row items-center gap-[4vw]">
             <li>
-              <NavLink to="/about" className="hover:text-orange">
+              <NavLink to="/sobre" className="hover:text-orange">
                 Sobre
               </NavLink>
             </li>
             <li>
-              <NavLink to="/services" className="hover:text-orange">
+              <NavLink to="/servicos" className="hover:text-orange">
                 Serviços
               </NavLink>
             </li>
@@ -78,7 +78,7 @@ export default function Header() {
           <ul className="flex flex-col gap-6">
             <li>
               <NavLink
-                to="/about"
+                to="/sobre"
                 className="hover:text-orange"
                 onClick={closeMenu}
               >
@@ -87,7 +87,7 @@ export default function Header() {
             </li>
             <li>
               <NavLink
-                to="/services"
+                to="/servicos"
                 className="hover:text-orange"
                 onClick={closeMenu}
               >

@@ -13,8 +13,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/services" element={<Services />} />
+        <Route path="/sobre" element={<About />} />
+        <Route path="/servicos" element={<Services />} />
         <Route path="/FAQ" element={<FAQ />} />
         <Route
           path="/admin"
@@ -30,7 +30,7 @@ function App() {
           <Route path="tipos" element={<AdminServicesType />} />
         </Route>
         <Route
-          path="/client"
+          path="/cliente"
           element={
             <PrivateRoute allowedRoles={['client']}>
               <Client />
@@ -38,7 +38,7 @@ function App() {
           }
         />
         <Route
-          path="/partner"
+          path="/parceiro"
           element={
             <PrivateRoute allowedRoles={['partner']}>
               <Partner />

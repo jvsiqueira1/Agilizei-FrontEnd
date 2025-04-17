@@ -11,6 +11,7 @@ import { api } from '@/services/api'
 import Modal from './Modal'
 import { ClientForm } from '.'
 import { useAuth } from '@/contexts/useAuth'
+import Cookies from 'js-cookie'
 
 interface Props {
   onClose: () => void
@@ -35,10 +36,9 @@ export default function ClientLogin({ onClose }: Props) {
       if (data) {
         setStep('otp')
         return enviarCodigo(data.data.telefone)
-      } else {
-        setBudgetModal(true)
       }
     } catch (e) {
+      setBudgetModal(true)
       console.log(e)
     }
   }
@@ -73,13 +73,15 @@ export default function ClientLogin({ onClose }: Props) {
         telefone: telefoneLimpo,
         codigo,
       })
+      console.log('Verificar OTP', { data })
+      if (data.sucesso && data.token && data.usuario) {
+        Cookies.set('token', data.token, { expires: 1 })
 
-      if (data) {
         login('client')
         setMensagem('Login realizado com sucesso!')
 
         setTimeout(() => {
-          navigate('/client')
+          navigate('/cliente')
           onClose()
         }, 1500)
       } else {

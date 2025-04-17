@@ -51,12 +51,13 @@ export default function PartnerLogin({ onClose }: Props) {
         codigo,
       })
 
-      if (data.sucesso) {
+      if (data) {
+        login('partner')
         setMensagem('Login realizado com sucesso!')
         setTimeout(() => {
           onClose()
-          login('partner')
-          navigate('/partner')
+
+          navigate('/parceiro')
         }, 1500)
       } else {
         setMensagem(data.erro || 'Código incorreto.')
