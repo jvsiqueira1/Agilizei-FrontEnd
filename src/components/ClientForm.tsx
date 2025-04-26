@@ -44,6 +44,28 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
       estado: '',
       descricao: '',
       foto: null,
+      tamanhoImovel: '',
+      tipoLimpeza: '',
+      frequencia: '',
+      horario: '',
+      extras: '',
+
+      tipoImovel: '',
+      superficie: '',
+      condicao: '',
+      prazo: '',
+
+      tipoServico: '',
+      descricaoProblema: '',
+
+      descricaoMoveis: '',
+      quantidadeMoveis: 0,
+
+      descricaoServico: '',
+      areaMetragem: '',
+
+      descricaoItens: '',
+      origemDestino: '',
     },
   })
 
@@ -135,6 +157,26 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
                     <Input placeholder="Nome completo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cpf"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CPF</FormLabel>
+                  <FormControl>
+                    <IMaskInput
+                      {...field}
+                      mask="000.000.000-00"
+                      placeholder="000.000.000-00"
+                      className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                      onAccept={(value: string) => field.onChange(value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

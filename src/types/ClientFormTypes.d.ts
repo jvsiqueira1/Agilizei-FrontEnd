@@ -3,6 +3,7 @@ export interface ClientFormData {
   servico: string
   nome: string
   email: string
+  cpf: string
   cep: string
   logradouro: string
   endereco: string
