@@ -1,18 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Cookies from 'js-cookie'
 import { AuthContext, AuthContextType, UserRole } from './AuthContext'
+import { jwtDecode } from 'jwt-decode'
 
 interface Props {
   children: React.ReactNode
 }
 
 export function AuthProvider({ children }: Props) {
-  const [userRole, setUserRole] = useState<UserRole>(null)
+  const [userRole, setUserRole] = useState<UserRole | null>(null)
 
-  const login = (role: UserRole) => {
+  useEffect(() => {
+    const token = Cookies.get('token')
+
+    if (token) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const decodedToken: any = jwtDecode(token)
+        console.log(decodedToken)
+        const role = decodedToken.role
+        setUserRole(role)
+      } catch (error) {
+        console.error('Token inválido: ', error)
+        setUserRole(null)
+      }
+    }
+  }, [])
+
+  const login = (role: UserRole, token: string) => {
+    Cookies.set('token', token, {
+      expires: 1,
+    })
     setUserRole(role)
   }
 
   const logout = () => {
+    Cookies.remove('token')
     setUserRole(null)
   }
 

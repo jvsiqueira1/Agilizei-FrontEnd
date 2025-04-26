@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/useAuth'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { api } from '@/services/api'
+import Cookies from 'js-cookie'
 
 export default function AdminLogin({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState('')
@@ -11,15 +13,30 @@ export default function AdminLogin({ onClose }: { onClose: () => void }) {
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (email === 'admin' && senha === 'admin') {
-      login('admin')
-      onClose()
-      navigate('/admin/funcionarios')
-    } else {
-      setErro('Email ou senha inválidos')
+    try {
+      const { data } = await api.post('/admin/login', { email, senha })
+      console.log(data.token)
+
+      if (data.sucesso && data.token) {
+        Cookies.set('token', data.token, {
+          expires: 1,
+          secure: true,
+          httpOnly: true,
+        })
+
+        login('admin', data.token)
+        setErro('')
+        onClose()
+        navigate('/admin/funcionarios')
+      } else {
+        setErro('Email ou senha inválidos!')
+      }
+    } catch (error) {
+      console.error(error)
+      setErro('Erro ao realizar login. Tente novamente.')
     }
   }
 

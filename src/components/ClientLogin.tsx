@@ -76,8 +76,7 @@ export default function ClientLogin({ onClose }: Props) {
       console.log('Verificar OTP', { data })
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
-
-        login('client')
+        login('client', data.token)
         setMensagem('Login realizado com sucesso!')
 
         setTimeout(() => {

@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
-import { criarOrcamento } from '@/services/orcamento'
+import { criarServico } from '@/services/servico'
 import { ClientFormData } from '@/types'
 import { Controller } from 'react-hook-form'
 import { useState } from 'react'
@@ -51,12 +51,14 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
 
   const onSubmit = async (data: ClientFormData) => {
     try {
-      const result = await criarOrcamento(data)
-      console.log('Orçamento enviado com sucesso: ', result)
-      alert('Orçamento enviado com sucesso!')
+      const clienteCriado = await criarServico(data)
+      console.log('Cliente criado com sucesso ', clienteCriado)
+
+      const serviceData = { ...data, clienteId: clienteCriado.id }
+      const resultado = await criarServico(serviceData)
+      console.log('Serviço criado com sucesso!', resultado)
     } catch (error) {
-      console.error('Erro ao enviar orçamento: ', error)
-      alert('Erro ao enviar orçamento.')
+      console.error('Erro ao enviar serviço: ', error)
     }
   }
 
@@ -84,7 +86,7 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
                       placeholder="(27) 98876-5432"
                       className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
                       onAccept={(value: string) => field.onChange(value)}
-                      value={telefone}
+                      value={telefone || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -104,7 +106,7 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
                         form.setValue('servico', value)
                         setServicoSelecionado(value)
                       }}
-                      defaultValue={form.getValues('servico')}
+                      value={form.getValues('servico') || ''}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Escolha o serviço" />
@@ -189,20 +191,6 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
               )}
             />
           </div>
-
-          <FormField
-            control={form.control}
-            name="endereco"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Endereço</FormLabel>
-                <FormControl>
-                  <Input placeholder="Endereço completo" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}

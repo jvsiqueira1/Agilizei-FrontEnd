@@ -1,54 +1,50 @@
+import { useForm } from 'react-hook-form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react'
+import { api } from '@/services/api'
+import { Modal } from '@/components'
 import {
   Table,
-  TableBody,
   TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { api } from '@/services/api'
-import { useEffect, useState } from 'react'
-import { Button } from '../ui/button'
-import { Modal } from '@/components'
+  TableHead,
+  TableBody,
+  TableCell,
+  TableFooter,
+} from '../ui/table'
 
 interface Client {
   id: number
   nome: string
-}
-
-interface Service {
-  id: number
-  descricao: string
-  servico: string
-  status?: string
-  createdAt?: string
+  email: string
+  telefone: string
+  cpf?: string
+  cnpj?: string
+  enderecos?: {
+    rua: string
+    numero: string
+    complemento?: string
+    bairro: string
+    cidade: string
+    estado: string
+    cep: string
+  }[]
 }
 
 export default function AdminClient() {
   const [clients, setClients] = useState<Client[]>([])
-  const [services, setServices] = useState<Service[]>([])
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [isModalOpen, setModalOpen] = useState(false)
-  const [serviceCounts, setServiceCounts] = useState<Record<number, number>>({})
+
+  const { register, handleSubmit, setValue, reset } = useForm<Client>()
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
         const { data } = await api.get('/clientes')
         setClients(data.data)
-
-        const counts: Record<number, number> = {}
-        await Promise.all(
-          data.data.map(async (client: Client) => {
-            const res = await api.get(`/servicos/cliente/${client.id}`)
-            counts[client.id] = Array.isArray(res.data?.data)
-              ? res.data.data.length
-              : 0
-          }),
-        )
-        setServiceCounts(counts)
       } catch (error) {
         console.error('Erro ao buscar cliente:', error)
       }
@@ -57,14 +53,73 @@ export default function AdminClient() {
     fetchClients()
   }, [])
 
-  const openClientDetails = async (client: Client) => {
+  const openClientDetails = (client: Client) => {
+    setSelectedClient(client)
+    reset(client)
+
+    setValue('nome', client.nome)
+    setValue('email', client.email)
+    setValue('telefone', client.telefone)
+
+    if (client.cpf) {
+      setValue('cpf', client.cpf)
+    } else if (client.cnpj) {
+      setValue('cnpj', client.cnpj)
+    }
+
+    if (client.enderecos && client.enderecos[0]) {
+      const address = client.enderecos[0]
+      setValue('enderecos.0.rua', address.rua)
+      setValue('enderecos.0.numero', address.numero)
+      setValue('enderecos.0.complemento', address.complemento || '')
+      setValue('enderecos.0.bairro', address.bairro)
+      setValue('enderecos.0.cidade', address.cidade)
+      setValue('enderecos.0.estado', address.estado)
+      setValue('enderecos.0.cep', address.cep)
+    }
+
+    setModalOpen(true)
+  }
+
+  const onSubmit = async (data: Client) => {
     try {
-      const { data } = await api.get(`/servicos/cliente/${client.id}`)
-      setServices(data.data)
-      setSelectedClient(client)
-      setModalOpen(true)
+      console.log('Dados enviados para atualização:', data)
+
+      if (data.enderecos && data.enderecos.length > 0) {
+        const endereco = data.enderecos[0]
+
+        data.enderecos = [
+          {
+            rua: endereco.rua,
+            numero: endereco.numero,
+            complemento: endereco.complemento,
+            bairro: endereco.bairro,
+            cidade: endereco.cidade,
+            estado: endereco.estado,
+            cep: endereco.cep,
+          },
+        ]
+      }
+
+      if (selectedClient) {
+        const updatedClient = await api.put(
+          `/clientes/${selectedClient.id}`,
+          data,
+        )
+        console.log('Cliente atualizado com sucesso: ', updatedClient)
+
+        setClients((prevClients) =>
+          prevClients.map((client) =>
+            client.id === selectedClient?.id ? { ...client, ...data } : client,
+          ),
+        )
+
+        alert('Cliente atualizado com sucesso!')
+        setModalOpen(false)
+      }
     } catch (error) {
-      console.error('Erro ao buscar serviços do cliente:', error)
+      console.error('Erro ao atualizar cliente: ', error)
+      alert('Erro ao atualizar cliente.')
     }
   }
 
@@ -75,9 +130,7 @@ export default function AdminClient() {
         <TableHeader>
           <TableRow>
             <TableHead className="w-1/2 text-left">Nome</TableHead>
-            <TableHead className="w-1/2 text-left">
-              Quantidade de Serviços
-            </TableHead>
+            <TableHead className="w-1/2 text-left">Email</TableHead>
             <TableHead className="w-1/4 text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -85,16 +138,14 @@ export default function AdminClient() {
           {clients.map((client) => (
             <TableRow key={client.id}>
               <TableCell className="w-1/2 text-left">{client.nome}</TableCell>
-              <TableCell className="w-1/2 text-left">
-                {serviceCounts[client.id] ?? '-'}
-              </TableCell>
+              <TableCell className="w-1/2 text-left">{client.email}</TableCell>
               <TableCell className="w-1/4 text-right">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => openClientDetails(client)}
                 >
-                  Ver detalhes
+                  Editar
                 </Button>
               </TableCell>
             </TableRow>
@@ -105,7 +156,6 @@ export default function AdminClient() {
             <TableCell className="w-1/2 font-bold text-left" colSpan={2}>
               Total de Clientes
             </TableCell>
-
             <TableCell className="w-1/4 text-right">{clients.length}</TableCell>
           </TableRow>
         </TableFooter>
@@ -115,31 +165,177 @@ export default function AdminClient() {
         {selectedClient && (
           <>
             <h2 className="text-xl font-semibold mb-4">
-              Serviços de {selectedClient.nome}
+              Editar Cliente - {selectedClient.nome}
             </h2>
-            {services?.length > 0 ? (
-              <ul className="space-y-2">
-                {services.map((service) => (
-                  <li key={service.id} className="border-b pb-2">
-                    <p>
-                      <strong>Serviço:</strong> {service.servico}
-                    </p>
-                    <p>
-                      <strong>Descrição:</strong> {service.descricao}
-                    </p>
-                    <p>
-                      <strong>Status:</strong>{' '}
-                      {service.status || 'Não informado'}
-                    </p>
-                    <p>
-                      <strong>Data:</strong> {service.createdAt?.split('T')[0]}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Nenhum serviço encontrado para esse cliente.</p>
-            )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="nome"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Nome
+                </label>
+                <Input
+                  id="nome"
+                  placeholder="Nome completo"
+                  {...register('nome')}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <Input id="email" placeholder="Email" {...register('email')} />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="telefone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Telefone
+                </label>
+                <Input
+                  id="telefone"
+                  placeholder="Telefone"
+                  {...register('telefone')}
+                />
+              </div>
+
+              {selectedClient.cpf && (
+                <div>
+                  <label
+                    htmlFor="cpf"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    CPF
+                  </label>
+                  <Input id="cpf" placeholder="CPF" {...register('cpf')} />
+                </div>
+              )}
+
+              {selectedClient.cnpj && (
+                <div>
+                  <label
+                    htmlFor="cnpj"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    CNPJ
+                  </label>
+                  <Input id="cnpj" placeholder="CNPJ" {...register('cnpj')} />
+                </div>
+              )}
+
+              {selectedClient.enderecos && selectedClient.enderecos[0] && (
+                <div className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].rua"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Rua
+                    </label>
+                    <Input
+                      id="enderecos[0].rua"
+                      placeholder="Rua"
+                      {...register('enderecos.0.rua')}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].numero"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Número
+                    </label>
+                    <Input
+                      id="enderecos[0].numero"
+                      placeholder="Número"
+                      {...register('enderecos.0.numero')}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].bairro"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Bairro
+                    </label>
+                    <Input
+                      id="enderecos[0].bairro"
+                      placeholder="Bairro"
+                      {...register('enderecos.0.bairro')}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].cidade"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Cidade
+                    </label>
+                    <Input
+                      id="enderecos[0].cidade"
+                      placeholder="Cidade"
+                      {...register('enderecos.0.cidade')}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].estado"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Estado
+                    </label>
+                    <Input
+                      id="enderecos[0].estado"
+                      placeholder="Estado"
+                      {...register('enderecos.0.estado')}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].cep"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      CEP
+                    </label>
+                    <Input
+                      id="enderecos[0].cep"
+                      placeholder="CEP"
+                      {...register('enderecos.0.cep')}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="enderecos[0].complemento"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Complemento
+                    </label>
+                    <Input
+                      id="enderecos[0].complemento"
+                      placeholder="Complemento"
+                      {...register('enderecos.0.complemento')}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 flex justify-end">
+                <Button type="submit">Salvar Alterações</Button>
+              </div>
+            </form>
           </>
         )}
       </Modal>

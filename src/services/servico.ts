@@ -1,7 +1,7 @@
 import { api } from './api'
 import { ClientFormData } from '@/types/ClientFormTypes'
 
-export const criarOrcamento = async (data: ClientFormData) => {
+export const criarServico = async (data: ClientFormData) => {
   const formData = new FormData()
 
   Object.entries(data).forEach(([key, value]) => {
@@ -12,7 +12,7 @@ export const criarOrcamento = async (data: ClientFormData) => {
     }
   })
 
-  const response = await api.post('/orcamentos', formData, {
+  const response = await api.post('/servicos', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

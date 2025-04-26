@@ -48,6 +48,16 @@ const AdminSidebar = () => {
           Tipos de Serviços
         </Button>
       </NavLink>
+      <NavLink
+        to="/admin/criar-admin"
+        className={({ isActive }) =>
+          isActive ? 'text-primary font-semibold' : 'text-muted-foreground'
+        }
+      >
+        <Button variant="ghost" className="w-full justify-start">
+          Criar novo admin
+        </Button>
+      </NavLink>
     </aside>
   )
 }

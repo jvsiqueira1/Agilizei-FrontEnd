@@ -5,6 +5,7 @@ import { Button } from './ui/button'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from './ui/input-otp'
 import { api } from '@/services/api'
 import { useAuth } from '@/contexts/useAuth'
+import Cookies from 'js-cookie'
 
 interface Props {
   onClose: () => void
@@ -51,8 +52,9 @@ export default function PartnerLogin({ onClose }: Props) {
         codigo,
       })
 
-      if (data) {
-        login('partner')
+      if (data.sucesso && data.token && data.usuario) {
+        Cookies.set('token', data.token, { expires: 1 })
+        login('partner', data.token)
         setMensagem('Login realizado com sucesso!')
         setTimeout(() => {
           onClose()

@@ -53,32 +53,40 @@ export default function AdminServices() {
   }
 
   return (
-    <div className="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-      {servicos.map((servico) => (
-        <motion.div
-          key={servico.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <h2 className="text-lg font-bold mb-1">
-            Tipo de serviço: {serviceTypeMap[servico.tipoServicoId]}
-          </h2>
+    <div className="p-6">
+      {servicos.length === 0 ? (
+        <div className="text-center text-lg font-semibold text-gray-500">
+          Nenhum serviço cadastrado.
+        </div>
+      ) : (
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          {servicos.map((servico) => (
+            <motion.div
+              key={servico.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <h2 className="text-lg font-bold mb-1">
+                Tipo de serviço: {serviceTypeMap[servico.tipoServicoId]}
+              </h2>
 
-          <div className="text-sm space-y-1">
-            <p>
-              <strong>Cliente:</strong>{' '}
-              {servico.cliente?.nome || 'Não encontrado'}
-            </p>
-            <p>
-              <strong>Parceiro:</strong>{' '}
-              {servico.profissional?.nome || 'Nenhum atribuído'}
-            </p>
-            <div className="mt-2">{getStatusBadge(servico)}</div>
-          </div>
-        </motion.div>
-      ))}
+              <div className="text-sm space-y-1">
+                <p>
+                  <strong>Cliente:</strong>{' '}
+                  {servico.cliente?.nome || 'Não encontrado'}
+                </p>
+                <p>
+                  <strong>Parceiro:</strong>{' '}
+                  {servico.profissional?.nome || 'Nenhum atribuído'}
+                </p>
+                <div className="mt-2">{getStatusBadge(servico)}</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
