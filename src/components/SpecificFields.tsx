@@ -162,7 +162,7 @@ export default function SpecificFields({ servico, control }: Props) {
         <>
           <FormField
             control={control}
-            name="tipoServico"
+            name="tipoServicoEletrico"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo de serviço elétrico</FormLabel>
@@ -232,7 +232,7 @@ export default function SpecificFields({ servico, control }: Props) {
         <>
           <FormField
             control={control}
-            name="descricaoServico"
+            name="descricaoServicoPedreiro"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Descrição do serviço</FormLabel>

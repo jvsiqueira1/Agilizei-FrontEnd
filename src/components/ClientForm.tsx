@@ -18,14 +18,73 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
-import { criarServico } from '@/services/servico'
 import { ClientFormData } from '@/types'
 import { Controller } from 'react-hook-form'
 import { useState } from 'react'
 import SpecificFields from './SpecificFields'
 import { IMaskInput } from 'react-imask'
+import { api } from '@/services/api'
+import { useAuth } from '@/contexts/useAuth'
+import Cookies from 'js-cookie'
+import { InputOTPGroup } from './ui/input-otp'
+import { InputOTPSlot } from './ui/input-otp'
+import { InputOTP } from './ui/input-otp'
+import { Modal } from '.'
+import { clientService } from '@/services/client'
+import { criarServico } from '@/services/servico'
+import { useNavigate } from 'react-router'
 
-export default function ClientForm({ telefone }: { telefone?: string }) {
+interface Props {
+  telefone?: string
+  onClose: () => void
+}
+
+export default function ClientForm({ telefone, onClose }: Props) {
+  const [openBudgetModal, setBudgetModal] = useState(false)
+  const [codigo, setCodigo] = useState('')
+  const [mensagem, setMensagem] = useState('')
+  const { login } = useAuth()
+  const navigate = useNavigate()
+
+  const verificarCodigo = async () => {
+    const telefoneLimpo = telefone?.replace(/\D/g, '')
+    console.log('verificar codigo ' + telefoneLimpo)
+
+    try {
+      const { data } = await api.post('/auth/verificar-otp', {
+        telefone: telefoneLimpo,
+        codigo,
+      })
+      console.log('Verificar OTP', { data })
+      if (data.sucesso && data.token && data.usuario) {
+        Cookies.set('token', data.token, { expires: 1 })
+        login('client', data.token)
+        setMensagem('Login realizado com sucesso!')
+
+        // Após o login bem-sucedido, cria o serviço
+        try {
+          const formData = form.getValues()
+          await criarServico(formData)
+          setMensagem('Serviço criado com sucesso!')
+
+          // Fecha o modal após um breve delay
+          setTimeout(() => {
+            navigate('/cliente')
+            onClose()
+          }, 1500)
+        } catch (error) {
+          console.error('Erro ao criar serviço:', error)
+          setMensagem('Erro ao criar serviço. Por favor, tente novamente.')
+        }
+      } else {
+        setMensagem(data.erro || 'Código incorreto.')
+      }
+    } catch (error) {
+      console.error(error)
+      setMensagem('Erro ao verificar código.')
+    }
+  }
+
   const [servicoSlecionado, setServicoSelecionado] = useState('')
 
   const form = useForm<ClientFormData>({
@@ -36,7 +95,7 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
       email: '',
       cep: '',
       logradouro: '',
-      endereco: '',
+      dataAgendada: '',
       complemento: '',
       numero: '',
       bairro: '',
@@ -55,13 +114,13 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
       condicao: '',
       prazo: '',
 
-      tipoServico: '',
+      tipoServicoEletrico: '',
       descricaoProblema: '',
 
       descricaoMoveis: '',
       quantidadeMoveis: 0,
 
-      descricaoServico: '',
+      descricaoServicoPedreiro: '',
       areaMetragem: '',
 
       descricaoItens: '',
@@ -73,14 +132,62 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
 
   const onSubmit = async (data: ClientFormData) => {
     try {
-      const clienteCriado = await criarServico(data)
-      console.log('Cliente criado com sucesso ', clienteCriado)
+      // Limpa o telefone para remover caracteres especiais
+      const telefoneLimpo = data.telefone.replace(/\D/g, '')
 
-      const serviceData = { ...data, clienteId: clienteCriado.id }
-      const resultado = await criarServico(serviceData)
-      console.log('Serviço criado com sucesso!', resultado)
+      // Verifica se o cliente já existe
+      const clienteExistente =
+        await clientService.verificarCliente(telefoneLimpo)
+
+      if (clienteExistente) {
+        // Se o cliente existe, apenas envia o OTP
+        const resultado = await api.post('/auth/enviar-otp', {
+          telefone: telefoneLimpo,
+          tipo: 'cliente',
+        })
+
+        if (resultado) {
+          setBudgetModal(true)
+          setMensagem('Código enviado para seu WhatsApp')
+        } else {
+          setMensagem(resultado || 'Erro ao enviar código')
+        }
+      } else {
+        // Se o cliente não existe, cria o cliente e envia o OTP
+        const novoCliente = await clientService.criarCliente({
+          telefone: telefoneLimpo,
+          nome: data.nome,
+          email: data.email,
+          enderecos: {
+            create: {
+              cep: data.cep,
+              rua: data.logradouro,
+              numero: data.numero,
+              complemento: data.complemento,
+              bairro: data.bairro,
+              cidade: data.cidade,
+              estado: data.estado,
+            },
+          },
+        })
+
+        if (novoCliente) {
+          const resultado = await api.post('/auth/enviar-otp', {
+            telefone: telefoneLimpo,
+            tipo: 'cliente',
+          })
+
+          if (resultado) {
+            setBudgetModal(true)
+            setMensagem('Código enviado para seu WhatsApp')
+          } else {
+            setMensagem(resultado || 'Erro ao enviar código')
+          }
+        }
+      }
     } catch (error) {
-      console.error('Erro ao enviar serviço: ', error)
+      console.error('Erro ao processar formulário:', error)
+      setMensagem('Ocorreu um erro ao processar sua solicitação')
     }
   }
 
@@ -91,6 +198,30 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
         alt="Agilizei Logo"
         className="mb-4 w-28 h-28"
       />
+      <Modal isVisible={openBudgetModal} onClose={() => setBudgetModal(false)}>
+        <label htmlFor="otp" className="text-sm font-medium">
+          Digite o código recebido
+        </label>
+        <InputOTP
+          maxLength={6}
+          value={codigo}
+          onChange={(val) => setCodigo(val)}
+        >
+          <InputOTPGroup>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <InputOTPSlot key={index} index={index} />
+            ))}
+          </InputOTPGroup>
+        </InputOTP>
+        {mensagem && (
+          <p className="text-sm text-muted-foreground text-center">
+            {mensagem}
+          </p>
+        )}
+        <Button onClick={verificarCodigo} className="w-full mt-2">
+          Verificar código
+        </Button>
+      </Modal>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -227,6 +358,20 @@ export default function ClientForm({ telefone }: { telefone?: string }) {
                   <FormLabel>Logradouro</FormLabel>
                   <FormControl>
                     <Input placeholder="Rua / Avenida" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="dataAgendada"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data Agendada</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Data Agendada" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -6,7 +6,7 @@ export interface ClientFormData {
   cpf: string
   cep: string
   logradouro: string
-  endereco: string
+  dataAgendada: string
   complemento: string
   numero: string
   bairro: string
@@ -26,13 +26,13 @@ export interface ClientFormData {
   condicao?: string
   prazo?: string
 
-  tipoServico?: string
+  tipoServicoEletrico?: string
   descricaoProblema?: string
 
   descricaoMoveis?: string
   quantidadeMoveis?: number
 
-  descricaoServico?: string
+  descricaoServicoPedreiro?: string
   areaMetragem?: string
 
   descricaoItens?: string

@@ -45,7 +45,7 @@ export default function ClientLogin({ onClose }: Props) {
 
   const enviarCodigo = async (telefoneCliente: string) => {
     const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
-    console.log('enviar codigo ' + telefoneLimpo)
+    console.log('enviar codigo!! ' + telefoneLimpo)
     try {
       const { data } = await api.post('/auth/enviar-otp', {
         telefone: telefoneLimpo,
@@ -145,7 +145,7 @@ export default function ClientLogin({ onClose }: Props) {
         <p className="text-sm text-muted-foreground text-center">{mensagem}</p>
       )}
       <Modal isVisible={openBudgetModal} onClose={() => setBudgetModal(false)}>
-        <ClientForm telefone={telefone} />
+        <ClientForm telefone={telefone} onClose={() => setBudgetModal(false)} />
       </Modal>
     </div>
   )
