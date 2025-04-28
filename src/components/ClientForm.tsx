@@ -45,9 +45,10 @@ export default function ClientForm({ telefone, onClose }: Props) {
   const [mensagem, setMensagem] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [phone, setPhone] = useState('')
 
   const verificarCodigo = async () => {
-    const telefoneLimpo = telefone?.replace(/\D/g, '')
+    const telefoneLimpo = phone.replace(/\D/g, '')
     console.log('verificar codigo ' + telefoneLimpo)
 
     try {
@@ -134,7 +135,7 @@ export default function ClientForm({ telefone, onClose }: Props) {
     try {
       // Limpa o telefone para remover caracteres especiais
       const telefoneLimpo = data.telefone.replace(/\D/g, '')
-
+      setPhone(telefoneLimpo)
       // Verifica se o cliente já existe
       const clienteExistente =
         await clientService.verificarCliente(telefoneLimpo)
@@ -233,14 +234,24 @@ export default function ClientForm({ telefone, onClose }: Props) {
                 <FormItem>
                   <FormLabel>Telefone</FormLabel>
                   <FormControl>
-                    <IMaskInput
-                      {...field}
-                      mask="(00) 00000-0000"
-                      placeholder="(27) 98876-5432"
-                      className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
-                      onAccept={(value: string) => field.onChange(value)}
-                      value={telefone || ''}
-                    />
+                    {!telefone ? (
+                      <IMaskInput
+                        {...field}
+                        mask="(00) 00000-0000"
+                        placeholder="(27) 98876-5432"
+                        className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                        onAccept={(value: string) => field.onChange(value)}
+                      />
+                    ) : (
+                      <IMaskInput
+                        {...field}
+                        mask="(00) 00000-0000"
+                        placeholder="(27) 98876-5432"
+                        className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                        onAccept={(value: string) => field.onChange(value)}
+                        value={telefone || ''}
+                      />
+                    )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
