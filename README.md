@@ -1,54 +1,52 @@
-# React + TypeScript + Vite
+# **Frontend - Agilizei**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este é o frontend da Agilizei.
 
-Currently, two official plugins are available:
+## **Tecnologias Utilizadas**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React.js** - Framework principal para construção da interface.
+- **TypeScript** - Para adicionar tipagem estática ao código.
+- **Tailwind CSS** - Framework de CSS utilitário para facilitar o design responsivo.
+- **Axios** - Para realizar requisições HTTP.
+- **JWT** - Para autenticação via token.
+- **React Router** - Para gerenciamento de rotas no aplicativo.
+- **js-cookie** - Para armazenar e gerenciar cookies (usado para salvar o JWT).
 
-## Expanding the ESLint configuration
+## **Funcionalidades**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Autenticação com JWT:**
+   - O cliente realiza o login utilizando um código OTP (enviado para o WhatsApp).
+   - O token JWT é salvo no `cookie` após o login bem-sucedido e é utilizado para autenticar as requisições.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+2. **Visualização de Serviços:**
+   - O cliente pode visualizar seus serviços em andamento e finalizados.
+   - O sistema exibe informações sobre os serviços como título, status, data, e orçamentos pendentes.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3. **Aceitação de Orçamentos:**
+   - O cliente pode visualizar os orçamentos disponíveis para os serviços e aceitá-los diretamente.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+4. **Exibição de Orçamentos:**
+   - Cada serviço com orçamento pendente mostra a lista de orçamentos disponíveis, com informações sobre o valor e a avaliação do profissional.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+5. **Envio de Orçamento (Parceiro):**
+   - O parceiro pode enviar um orçamento para um serviço, incluindo valor estimado e descrição.
+   - O orçamento enviado fica disponível para o cliente visualizar e aceitar.
+   
+## **Instruções para Execução do Projeto**
+
+### **Passos para Rodar o Frontend Localmente:**
+
+   Clone este repositório para sua máquina local:
+   ```bash
+   git clone <URL_DO_REPOSITÓRIO>
+   cd <NOME_DA_PASTA>
+   ```
+   Instale as Dependências: Instale as dependências necessárias com o comando:
+   ```bash
+   npm install
+   ```
+   Inicie o Servidor de Desenvolvimento: Após a instalação das dependências, inicie o servidor de desenvolvimento com:
+   ```bash
+   npm run dev
+   ```
+   Isso iniciará o frontend e a aplicação estará disponível no navegador em http://localhost:5173/.
