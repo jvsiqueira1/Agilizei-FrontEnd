@@ -31,28 +31,26 @@ export default function Home() {
         <h1 className="text-xl md:text-2xl font-semibold leading-snug mb-16">
           Conectando você aos melhores profissionais do mercado
         </h1>
-        <div className="flex flex-wrap gap-2 md:gap-4">
+        <div className="flex flex-wrap gap-4 justify-center items-center w-full">
           <Button onClick={() => setBudgetModal(true)}>
             FAÇA SEU ORÇAMENTO
           </Button>
-          <Modal
-            isVisible={openBudgetModal}
-            onClose={() => setBudgetModal(false)}
-          >
-            <ClientForm onClose={() => setBudgetModal(false)} />
-          </Modal>
           <Button onClick={() => setPartnerModal(true)}>
             SEJA NOSSO PARCEIRO
           </Button>
-          <Modal
-            isVisible={openPartnerModal}
-            onClose={() => setPartnerModal(false)}
-          >
-            <PartnerForm />
-          </Modal>
         </div>
       </section>
       <Footer />
+
+      <Modal isVisible={openBudgetModal} onClose={() => setBudgetModal(false)}>
+        <ClientForm onClose={() => setBudgetModal(false)} />
+      </Modal>
+      <Modal
+        isVisible={openPartnerModal}
+        onClose={() => setPartnerModal(false)}
+      >
+        <PartnerForm />
+      </Modal>
     </>
   )
 }
