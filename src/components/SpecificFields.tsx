@@ -67,9 +67,9 @@ export default function SpecificFields({ servico, control }: Props) {
             name="horario"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data e horário preferidos</FormLabel>
+                <FormLabel>Horário preferidos</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ex: Segunda às 8h" {...field} />
+                  <Input placeholder="Ex: às 8h da manhã" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

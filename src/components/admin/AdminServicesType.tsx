@@ -56,11 +56,13 @@ export default function AdminServicesType() {
     }
   }
 
-  const handleAddService = async () => {
+  const handleAddService = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
-      api.post('/tipos-servico', addService)
+      await api.post('/tipos-servico', addService)
       setTiposServicoModal(false)
       fetchTipoServico()
+      setAddService({ nome: '', descricao: '' })
     } catch (error) {
       console.error(error)
     }
@@ -178,13 +180,17 @@ export default function AdminServicesType() {
               placeholder="Nome do serviço"
               onChange={handleInputChange}
               name="nome"
+              className="border-black"
             />
             <Input
               placeholder="Descrição do serviço"
               onChange={handleInputChange}
               name="descricao"
+              className="border-black"
             />
-            <Button type="submit">Adicionar novo serviço</Button>
+            <Button type="submit" className="bg-black hover:bg-opacity-70">
+              Adicionar novo serviço
+            </Button>
           </div>
         </form>
       </Modal>
@@ -211,12 +217,12 @@ export default function AdminServicesType() {
               <Button
                 type="button"
                 variant="destructive"
-                onClick={() => {
+                onClick={async () => {
                   console.log(
                     'Deletando o serviço com ID: ',
                     selectedTipoServico?.id,
                   )
-                  handleDeleteService()
+                  await handleDeleteService()
                 }}
               >
                 Excluir

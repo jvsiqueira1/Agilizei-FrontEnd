@@ -62,7 +62,11 @@ export default function AdminCreate() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Nome" {...field} />
+                  <Input
+                    placeholder="Nome"
+                    {...field}
+                    className="border-black"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -75,7 +79,11 @@ export default function AdminCreate() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="Email" {...field} />
+                  <Input
+                    placeholder="Email"
+                    {...field}
+                    className="border-black"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -89,7 +97,12 @@ export default function AdminCreate() {
               <FormItem>
                 <FormLabel>Senha</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="Senha" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="Senha"
+                    {...field}
+                    className="border-black"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -97,7 +110,11 @@ export default function AdminCreate() {
           />
 
           <div className="flex justify-center">
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-black hover:bg-opacity-70"
+            >
               {loading ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </div>

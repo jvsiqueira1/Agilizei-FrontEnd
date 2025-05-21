@@ -25,7 +25,7 @@ function App() {
             </PrivateRoute>
           }
         >
-          <Route path="funcionarios" element={<AdminPartner />} />
+          <Route path="parceiros" element={<AdminPartner />} />
           <Route path="clientes" element={<AdminClient />} />
           <Route path="servicos" element={<AdminServices />} />
           <Route path="tipos" element={<AdminServicesType />} />
@@ -34,17 +34,17 @@ function App() {
         <Route
           path="/cliente"
           element={
-            // <PrivateRoute allowedRoles={['client']}>
-            <Client />
-            // </PrivateRoute>
+            <PrivateRoute allowedRoles={['client']}>
+              <Client />
+            </PrivateRoute>
           }
         />
         <Route
           path="/parceiro"
           element={
-            // <PrivateRoute allowedRoles={['partner']}>
-            <Partner />
-            // </PrivateRoute>
+            <PrivateRoute allowedRoles={['partner']}>
+              <Partner />
+            </PrivateRoute>
           }
         />
       </Routes>

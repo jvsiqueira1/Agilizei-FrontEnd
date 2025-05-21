@@ -1,6 +1,9 @@
+@import 'react-day-picker/dist/style.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -71,4 +74,23 @@
   body {
     @apply bg-light-gray text-foreground;
   }
+}
+
+.magnify {
+  @apply absolute hidden bg-no-repeat border-2 border-black;
+  width: 200px;
+  height: 200px;
+  background-size: 800%;
+  background-position: center;
+  pointer-events: none;
+}
+
+.rdp-weekdays {
+  display: flex;
+  justify-content: space-between;
+}
+
+.rdp-week {
+  display: grid;
+  grid-auto-flow: column;
 }

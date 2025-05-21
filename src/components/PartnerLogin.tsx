@@ -6,6 +6,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from './ui/input-otp'
 import { api } from '@/services/api'
 import { useAuth } from '@/contexts/useAuth'
 import Cookies from 'js-cookie'
+import { useToast } from '@/components/hooks/use-toast'
 
 interface Props {
   onClose: () => void
@@ -15,9 +16,9 @@ export default function PartnerLogin({ onClose }: Props) {
   const [telefone, setTelefone] = useState('')
   const [step, setStep] = useState<'telefone' | 'otp'>('telefone')
   const [codigo, setCodigo] = useState('')
-  const [mensagem, setMensagem] = useState('')
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { toast } = useToast()
 
   const enviarCodigo = async () => {
     const telefoneLimpo = telefone.replace(/\D/g, '')
@@ -26,20 +27,31 @@ export default function PartnerLogin({ onClose }: Props) {
         telefone: telefoneLimpo,
         tipo: 'parceiro',
       })
+      console.log('Resposta do enviar-otp:', data)
 
       if (data.sucesso) {
         setStep('otp')
-        setMensagem('Código enviado para seu WhatsApp')
+        toast({
+          variant: 'default',
+          title: 'Código enviado para seu WhatsApp',
+        })
       } else {
-        setMensagem(data.erro || 'Erro ao enviar o código')
+        toast({
+          title: 'Erro ao enviar o código',
+          description: data.erro,
+        })
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error)
-      setMensagem('Erro ao enviar o código.')
+      toast({
+        title: 'Erro ao enviar o código.',
+      })
 
       if (error.response?.status === 404) {
-        setMensagem(`${error.response.data.erro}`)
+        toast({
+          title: `${error.response.data.erro}`,
+        })
       }
     }
   }
@@ -55,19 +67,20 @@ export default function PartnerLogin({ onClose }: Props) {
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
         login('partner', data.token)
-        setMensagem('Login realizado com sucesso!')
+        toast({ variant: 'default', title: 'Login realizado com sucesso!' })
+
         setTimeout(() => {
           onClose()
 
           navigate('/parceiro')
         }, 1500)
       } else {
-        setMensagem(data.erro || 'Código incorreto.')
+        toast({ title: 'Código incorreto.', description: data.erro })
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error)
-      setMensagem('Erro ao verificar código.')
+      toast({ title: 'Erro ao verificar código.' })
     }
   }
 
@@ -117,10 +130,6 @@ export default function PartnerLogin({ onClose }: Props) {
             Verificar código
           </Button>
         </>
-      )}
-
-      {mensagem && (
-        <p className="text-sm text-muted-foreground text-center">{mensagem}</p>
       )}
     </div>
   )

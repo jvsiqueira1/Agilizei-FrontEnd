@@ -1,9 +1,7 @@
-import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { api } from '@/services/api'
-import { Modal } from '@/components'
 import {
   Table,
   TableCaption,
@@ -14,6 +12,16 @@ import {
   TableCell,
   TableFooter,
 } from '../ui/table'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination'
+import EditClientModal from './EditClientModal'
+import { useToast } from '@/components/hooks/use-toast'
 
 interface Client {
   id: number
@@ -22,109 +30,129 @@ interface Client {
   telefone: string
   cpf?: string
   cnpj?: string
-  enderecos?: {
-    rua: string
-    numero: string
-    complemento?: string
-    bairro: string
-    cidade: string
-    estado: string
-    cep: string
-  }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  servicos?: any[]
 }
 
-export default function AdminClient() {
-  const [clients, setClients] = useState<Client[]>([])
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
-  const [isModalOpen, setModalOpen] = useState(false)
+const PAGE_SIZE = 10
 
-  const { register, handleSubmit, setValue, reset } = useForm<Client>()
+export default function AdminClient() {
+  const { toast } = useToast()
+  const [clients, setClients] = useState<Client[]>([])
+  const [termoBusca, setTermoBusca] = useState('')
+  const [filtroBusca, setFiltroBusca] = useState('')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [modalAberto, setModalAberto] = useState(false)
+  const [clienteSelecionado, setClienteSelecionado] = useState<Client | null>(
+    null,
+  )
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const { data } = await api.get('/clientes')
-        setClients(data.data)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const params: any = {
+          page,
+          limit: PAGE_SIZE,
+        }
+        if (filtroBusca) {
+          params.search = filtroBusca
+        }
+
+        const response = await api.get('/clientes', { params })
+
+        const clientData =
+          response.data?.data?.data ?? response.data?.data ?? []
+        const totalCount =
+          response.data?.data?.totalCount ??
+          response.data?.total ??
+          clientData.length
+        const pages = response.data?.data?.totalPages ?? 1
+
+        setClients(Array.isArray(clientData) ? clientData : [])
+        setTotal(totalCount)
+        setTotalPages(pages)
       } catch (error) {
         console.error('Erro ao buscar cliente:', error)
+        setClients([])
+        setTotal(0)
+        setTotalPages(1)
       }
     }
 
     fetchClients()
-  }, [])
+  }, [page, filtroBusca])
 
-  const openClientDetails = (client: Client) => {
-    setSelectedClient(client)
-    reset(client)
-
-    setValue('nome', client.nome)
-    setValue('email', client.email)
-    setValue('telefone', client.telefone)
-
-    if (client.cpf) {
-      setValue('cpf', client.cpf)
-    } else if (client.cnpj) {
-      setValue('cnpj', client.cnpj)
-    }
-
-    if (client.enderecos && client.enderecos[0]) {
-      const address = client.enderecos[0]
-      setValue('enderecos.0.rua', address.rua)
-      setValue('enderecos.0.numero', address.numero)
-      setValue('enderecos.0.complemento', address.complemento || '')
-      setValue('enderecos.0.bairro', address.bairro)
-      setValue('enderecos.0.cidade', address.cidade)
-      setValue('enderecos.0.estado', address.estado)
-      setValue('enderecos.0.cep', address.cep)
-    }
-
-    setModalOpen(true)
+  const abrirModal = (client: Client) => {
+    setClienteSelecionado(client)
+    setModalAberto(true)
   }
 
-  const onSubmit = async (data: Client) => {
+  const fecharModal = () => {
+    setModalAberto(false)
+    setClienteSelecionado(null)
+  }
+
+  const salvarCliente = async (data: Client) => {
     try {
-      console.log('Dados enviados para atualização:', data)
-
-      if (data.enderecos && data.enderecos.length > 0) {
-        const endereco = data.enderecos[0]
-
-        data.enderecos = [
-          {
-            rua: endereco.rua,
-            numero: endereco.numero,
-            complemento: endereco.complemento,
-            bairro: endereco.bairro,
-            cidade: endereco.cidade,
-            estado: endereco.estado,
-            cep: endereco.cep,
-          },
-        ]
-      }
-
-      if (selectedClient) {
-        const updatedClient = await api.put(
-          `/clientes/${selectedClient.id}`,
-          data,
-        )
-        console.log('Cliente atualizado com sucesso: ', updatedClient)
-
-        setClients((prevClients) =>
-          prevClients.map((client) =>
-            client.id === selectedClient?.id ? { ...client, ...data } : client,
-          ),
-        )
-
-        alert('Cliente atualizado com sucesso!')
-        setModalOpen(false)
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar cliente: ', error)
-      alert('Erro ao atualizar cliente.')
+      console.log('Enviando para API: ', data)
+      await api.put(`/clientes/${data.id}`, data)
+      setClients((prev) =>
+        prev.map((c) => (c.id === data.id ? { ...c, ...data } : c)),
+      )
+      toast({
+        variant: 'default',
+        title: 'Cliente atualizado com sucesso',
+      })
+      fecharModal()
+    } catch {
+      toast({
+        title: 'Erro ao atualizar cliente',
+      })
     }
   }
+
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
 
   return (
     <>
+      <div className="mb-4 flex justify-center items-center">
+        <label htmlFor="buscaGeral" className="font-semibold mr-2">
+          Buscar por nome, telefone, email ou tipo de serviço:
+        </label>
+        <Input
+          id="buscaGeral"
+          type="text"
+          className="border-black rounded-full px-3 py-2 w-full max-w-md"
+          value={termoBusca}
+          onChange={(e) => {
+            setTermoBusca(e.target.value)
+            if (e.target.value.trim() === '') {
+              setFiltroBusca('')
+              setPage(1)
+            }
+          }}
+          placeholder="Digite nome, telefone ou email"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              setFiltroBusca(termoBusca)
+              setPage(1)
+            }
+          }}
+        />
+        <Button
+          className="bg-black hover:bg-opacity-70 ml-2"
+          onClick={() => {
+            setFiltroBusca(termoBusca)
+            setPage(1) // resetar página ao buscar
+          }}
+        >
+          Buscar
+        </Button>
+      </div>
       <Table>
         <TableCaption>Lista de Clientes Agilizei</TableCaption>
         <TableHeader>
@@ -143,7 +171,7 @@ export default function AdminClient() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => openClientDetails(client)}
+                  onClick={() => abrirModal(client)}
                 >
                   Editar
                 </Button>
@@ -156,189 +184,63 @@ export default function AdminClient() {
             <TableCell className="w-1/2 font-bold text-left" colSpan={2}>
               Total de Clientes
             </TableCell>
-            <TableCell className="w-1/4 text-right">{clients.length}</TableCell>
+            <TableCell className="w-1/4 text-right">{total}</TableCell>
           </TableRow>
         </TableFooter>
       </Table>
+      <Pagination
+        aria-label="Paginação de clientes"
+        className="mt-6 flex justify-center"
+      >
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              className="hover:underline"
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                if (page > 1) setPage(page - 1)
+              }}
+              aria-disabled={page === 1}
+            />
+          </PaginationItem>
 
-      <Modal isVisible={isModalOpen} onClose={() => setModalOpen(false)}>
-        {selectedClient && (
-          <>
-            <h2 className="text-xl font-semibold mb-4">
-              Editar Cliente - {selectedClient.nome}
-            </h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="nome"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Nome
-                </label>
-                <Input
-                  id="nome"
-                  placeholder="Nome completo"
-                  {...register('nome')}
-                />
-              </div>
+          {pages.map((p) => (
+            <PaginationItem key={p}>
+              <PaginationLink
+                className="border-none hover:bg-inherit"
+                href="#"
+                isActive={p === page}
+                onClick={(e) => {
+                  e.preventDefault()
+                  setPage(p)
+                }}
+              >
+                {p}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
 
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email
-                </label>
-                <Input id="email" placeholder="Email" {...register('email')} />
-              </div>
+          <PaginationItem>
+            <PaginationNext
+              className="hover:underline"
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                if (page < totalPages) setPage(page + 1)
+              }}
+              aria-disabled={page === totalPages}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
 
-              <div>
-                <label
-                  htmlFor="telefone"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Telefone
-                </label>
-                <Input
-                  id="telefone"
-                  placeholder="Telefone"
-                  {...register('telefone')}
-                />
-              </div>
-
-              {selectedClient.cpf && (
-                <div>
-                  <label
-                    htmlFor="cpf"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    CPF
-                  </label>
-                  <Input id="cpf" placeholder="CPF" {...register('cpf')} />
-                </div>
-              )}
-
-              {selectedClient.cnpj && (
-                <div>
-                  <label
-                    htmlFor="cnpj"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    CNPJ
-                  </label>
-                  <Input id="cnpj" placeholder="CNPJ" {...register('cnpj')} />
-                </div>
-              )}
-
-              {selectedClient.enderecos && selectedClient.enderecos[0] && (
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].rua"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Rua
-                    </label>
-                    <Input
-                      id="enderecos[0].rua"
-                      placeholder="Rua"
-                      {...register('enderecos.0.rua')}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].numero"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Número
-                    </label>
-                    <Input
-                      id="enderecos[0].numero"
-                      placeholder="Número"
-                      {...register('enderecos.0.numero')}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].bairro"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Bairro
-                    </label>
-                    <Input
-                      id="enderecos[0].bairro"
-                      placeholder="Bairro"
-                      {...register('enderecos.0.bairro')}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].cidade"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Cidade
-                    </label>
-                    <Input
-                      id="enderecos[0].cidade"
-                      placeholder="Cidade"
-                      {...register('enderecos.0.cidade')}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].estado"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Estado
-                    </label>
-                    <Input
-                      id="enderecos[0].estado"
-                      placeholder="Estado"
-                      {...register('enderecos.0.estado')}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].cep"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      CEP
-                    </label>
-                    <Input
-                      id="enderecos[0].cep"
-                      placeholder="CEP"
-                      {...register('enderecos.0.cep')}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="enderecos[0].complemento"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Complemento
-                    </label>
-                    <Input
-                      id="enderecos[0].complemento"
-                      placeholder="Complemento"
-                      {...register('enderecos.0.complemento')}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-4 flex justify-end">
-                <Button type="submit">Salvar Alterações</Button>
-              </div>
-            </form>
-          </>
-        )}
-      </Modal>
+      <EditClientModal
+        isOpen={modalAberto}
+        onClose={fecharModal}
+        client={clienteSelecionado}
+        onSave={salvarCliente}
+      />
     </>
   )
 }

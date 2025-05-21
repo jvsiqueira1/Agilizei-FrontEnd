@@ -1,5 +1,10 @@
 import { NavLink } from 'react-router'
 import { Button } from '@/components/ui/button'
+import Cookies from 'js-cookie'
+
+const handleLogout = () => {
+  Cookies.remove('token')
+}
 
 const AdminSidebar = () => {
   return (
@@ -7,13 +12,13 @@ const AdminSidebar = () => {
       <h2 className="text-lg font-bold">Agilizei Admin</h2>
 
       <NavLink
-        to="/admin/funcionarios"
+        to="/admin/parceiros"
         className={({ isActive }) =>
           isActive ? 'text-primary font-semibold' : 'text-muted-foreground'
         }
       >
         <Button variant="ghost" className="w-full justify-start">
-          Funcionários
+          Parceiros
         </Button>
       </NavLink>
 
@@ -56,6 +61,17 @@ const AdminSidebar = () => {
       >
         <Button variant="ghost" className="w-full justify-start">
           Criar novo admin
+        </Button>
+      </NavLink>
+      <NavLink
+        onClick={handleLogout}
+        to="/"
+        className={({ isActive }) =>
+          isActive ? 'text-primary font-semibold' : 'text-muted-foreground'
+        }
+      >
+        <Button variant="ghost" className="w-full justify-start">
+          Sair
         </Button>
       </NavLink>
     </aside>

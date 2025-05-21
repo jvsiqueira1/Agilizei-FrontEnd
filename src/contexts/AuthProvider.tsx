@@ -9,6 +9,7 @@ interface Props {
 
 export function AuthProvider({ children }: Props) {
   const [userRole, setUserRole] = useState<UserRole | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const token = Cookies.get('token')
@@ -17,7 +18,6 @@ export function AuthProvider({ children }: Props) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const decodedToken: any = jwtDecode(token)
-        console.log(decodedToken)
         const role = decodedToken.role
         setUserRole(role)
       } catch (error) {
@@ -25,6 +25,7 @@ export function AuthProvider({ children }: Props) {
         setUserRole(null)
       }
     }
+    setLoading(false)
   }, [])
 
   const login = (role: UserRole, token: string) => {
@@ -45,6 +46,8 @@ export function AuthProvider({ children }: Props) {
     login,
     logout,
   }
+
+  if (loading) return null
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

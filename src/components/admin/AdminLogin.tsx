@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { api } from '@/services/api'
 import Cookies from 'js-cookie'
+import { useToast } from '@/components/hooks/use-toast'
 
 export default function AdminLogin({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [erro, setErro] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,15 +29,22 @@ export default function AdminLogin({ onClose }: { onClose: () => void }) {
         })
 
         login('admin', data.token)
-        setErro('')
+        toast({
+          variant: 'default',
+          title: 'Login realizado com sucesso!',
+        })
         onClose()
-        navigate('/admin/funcionarios')
+        navigate('/admin/parceiros')
       } else {
-        setErro('Email ou senha inválidos!')
+        toast({
+          title: 'Email ou senha inválidos!',
+        })
       }
     } catch (error) {
       console.error(error)
-      setErro('Erro ao realizar login. Tente novamente.')
+      toast({
+        title: 'Erro ao realizar login. Tente novamente.',
+      })
     }
   }
 
@@ -71,10 +79,6 @@ export default function AdminLogin({ onClose }: { onClose: () => void }) {
             required
           />
         </div>
-
-        {erro && (
-          <p className="text-red-500 text-sm mb-4 text-center">{erro}</p>
-        )}
 
         <Button type="submit" className="w-full">
           Entrar

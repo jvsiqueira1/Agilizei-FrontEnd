@@ -12,6 +12,7 @@ import Modal from './Modal'
 import { ClientForm } from '.'
 import { useAuth } from '@/contexts/useAuth'
 import Cookies from 'js-cookie'
+import { useToast } from '@/components/hooks/use-toast'
 
 interface Props {
   onClose: () => void
@@ -22,9 +23,9 @@ export default function ClientLogin({ onClose }: Props) {
   const [telefone, setTelefone] = useState('')
   const [step, setStep] = useState<'telefone' | 'otp'>('telefone')
   const [codigo, setCodigo] = useState('')
-  const [mensagem, setMensagem] = useState('')
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { toast } = useToast()
 
   //Verificar se o usuário existe no banco de dados
   const verificarUsuario = async (telefoneCliente: string) => {
@@ -53,14 +54,21 @@ export default function ClientLogin({ onClose }: Props) {
       })
       if (data) {
         setStep('otp')
-        setMensagem('Código enviado para seu WhatsApp')
+        toast({
+          variant: 'default',
+          title: 'Código enviado para seu WhatsApp',
+        })
       } else {
-        setMensagem(data.erro || 'Erro ao enviar o código.')
+        toast({
+          title: data.erro || 'Erro ao enviar o código.',
+        })
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error)
-      setMensagem(error.response?.data?.erro || 'Erro ao enviar o código.')
+      toast({
+        title: error.response?.data?.erro || 'Erro ao enviar o código.',
+      })
     }
   }
 
@@ -77,18 +85,25 @@ export default function ClientLogin({ onClose }: Props) {
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
         login('client', data.token)
-        setMensagem('Login realizado com sucesso!')
+        toast({
+          variant: 'default',
+          title: 'Login realizado com sucesso!',
+        })
 
         setTimeout(() => {
           navigate('/cliente')
           onClose()
         }, 1500)
       } else {
-        setMensagem(data.erro || 'Código incorreto.')
+        toast({
+          title: data.erro || 'Código incorreto.',
+        })
       }
     } catch (error) {
       console.error(error)
-      setMensagem('Erro ao verificar código.')
+      toast({
+        title: 'Erro ao verificar código.',
+      })
     }
   }
 
@@ -141,9 +156,6 @@ export default function ClientLogin({ onClose }: Props) {
         </>
       )}
 
-      {mensagem && (
-        <p className="text-sm text-muted-foreground text-center">{mensagem}</p>
-      )}
       <Modal isVisible={openBudgetModal} onClose={() => setBudgetModal(false)}>
         <ClientForm telefone={telefone} onClose={() => setBudgetModal(false)} />
       </Modal>

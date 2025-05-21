@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select'
 import { ClientFormData } from '@/types'
 import { Controller } from 'react-hook-form'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SpecificFields from './SpecificFields'
 import { IMaskInput } from 'react-imask'
 import { api } from '@/services/api'
@@ -33,19 +33,117 @@ import { Modal } from '.'
 import { clientService } from '@/services/client'
 import { criarServico } from '@/services/servico'
 import { useNavigate } from 'react-router'
+import { jwtDecode } from 'jwt-decode'
+import { getCep, Endereco } from '@/services/cepService'
+import { validaCpf } from '@/lib/validations'
+import { useToast } from '@/components/hooks/use-toast'
+import { DayPicker } from '@/components'
+
+interface TipoServico {
+  id: number
+  nome: string
+  descricao: string
+  active: boolean
+}
 
 interface Props {
   telefone?: string
   onClose: () => void
 }
 
+interface Cliente {
+  nome: string
+  cpf: string
+  email: string
+}
+
 export default function ClientForm({ telefone, onClose }: Props) {
   const [openBudgetModal, setBudgetModal] = useState(false)
   const [codigo, setCodigo] = useState('')
-  const [mensagem, setMensagem] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
   const [phone, setPhone] = useState('')
+  const [tiposServico, setTiposServico] = useState<TipoServico[]>([])
+  const [userData, setUserData] = useState<Cliente>({
+    nome: '',
+    cpf: '',
+    email: '',
+  })
+  const [cep, setCep] = useState('')
+  const servicosComDescricaoEspecifica = ['Eletricista', 'Pedreiro']
+  const { toast } = useToast()
+
+  useEffect(() => {
+    if (cep.length === 8) {
+      getCep(cep)
+        .then((address: Endereco) => {
+          form.setValue('logradouro', address.logradouro)
+          form.setValue('bairro', address.bairro)
+          form.setValue('cidade', address.cidade)
+          form.setValue('estado', address.estado)
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .catch((error: any) => {
+          toast({
+            title: error.message,
+          })
+        })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cep])
+
+  useEffect(() => {
+    console.log('Validando CPF')
+    if (userData.cpf.length === 14 && !validaCpf(userData.cpf)) {
+      toast({
+        title: 'Digite um CPF válido.',
+      })
+      setUserData({
+        ...userData,
+        cpf: '',
+      })
+    }
+  }, [toast, userData, userData.cpf])
+
+  useEffect(() => {
+    const fetchTipos = async () => {
+      try {
+        const { data } = await api.get('/tipos-servico')
+        if (Array.isArray(data.data)) {
+          // Filtro para mostrar apenas os tipos de serviço ativos
+          setTiposServico(
+            data.data.filter((tipo: { active: boolean }) => tipo.active),
+          )
+        }
+      } catch (error) {
+        console.error('Erro ao carregar tipos de serviço', error)
+      }
+    }
+
+    const fetchUserData = async () => {
+      try {
+        const token = Cookies.get('token')
+        if (token) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const decoded: any = jwtDecode(token)
+          const userId = decoded.id
+
+          const { data } = await api.get(`/clientes/${userId}`)
+          console.log('cliente logado: ', data)
+          setUserData({
+            nome: data.data.nome,
+            cpf: data.data.cpf,
+            email: data.data.email,
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do cliente', error)
+      }
+    }
+
+    fetchTipos()
+    fetchUserData()
+  }, [])
 
   const verificarCodigo = async () => {
     const telefoneLimpo = phone.replace(/\D/g, '')
@@ -60,13 +158,19 @@ export default function ClientForm({ telefone, onClose }: Props) {
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
         login('client', data.token)
-        setMensagem('Login realizado com sucesso!')
+        toast({
+          variant: 'default',
+          title: 'Login realizado com sucesso!',
+        })
 
         // Após o login bem-sucedido, cria o serviço
         try {
           const formData = form.getValues()
           await criarServico(formData)
-          setMensagem('Serviço criado com sucesso!')
+          toast({
+            variant: 'default',
+            title: 'Serviço criado com sucesso!',
+          })
 
           // Fecha o modal após um breve delay
           setTimeout(() => {
@@ -75,14 +179,20 @@ export default function ClientForm({ telefone, onClose }: Props) {
           }, 1500)
         } catch (error) {
           console.error('Erro ao criar serviço:', error)
-          setMensagem('Erro ao criar serviço. Por favor, tente novamente.')
+          toast({
+            title: 'Erro ao criar serviço. Por favor, tente novamente.',
+          })
         }
       } else {
-        setMensagem(data.erro || 'Código incorreto.')
+        toast({
+          title: data.erro || 'Código incorreto.',
+        })
       }
     } catch (error) {
       console.error(error)
-      setMensagem('Erro ao verificar código.')
+      toast({
+        title: 'Erro ao verificar código.',
+      })
     }
   }
 
@@ -129,13 +239,48 @@ export default function ClientForm({ telefone, onClose }: Props) {
     },
   })
 
-  const servicosComDescricaoEspecifica = ['Eletricista', 'Pedreiro']
+  const prepareFormData = (data: ClientFormData): FormData | ClientFormData => {
+    if (!data.nome && userData.nome) {
+      data.nome = userData.nome
+    }
+    if (!data.email && userData.email) {
+      data.email = userData.email
+    }
+
+    if (data.foto) {
+      const formData = new FormData()
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value instanceof File ? value : String(value))
+        }
+      })
+      return formData
+    }
+    return data
+  }
 
   const onSubmit = async (data: ClientFormData) => {
+    console.log('onSubmit', data)
     try {
+      const formData = prepareFormData(data)
       // Limpa o telefone para remover caracteres especiais
       const telefoneLimpo = data.telefone.replace(/\D/g, '')
       setPhone(telefoneLimpo)
+
+      // Checagem se já está logado como Cliente
+      const token = Cookies.get('token')
+      if (token) {
+        await criarServico(formData)
+        toast({
+          variant: 'default',
+          title: 'Serviço criado com sucesso!',
+        })
+        setTimeout(() => {
+          onClose()
+        }, 500)
+        return
+      }
+
       // Verifica se o cliente já existe
       const clienteExistente =
         await clientService.verificarCliente(telefoneLimpo)
@@ -149,9 +294,14 @@ export default function ClientForm({ telefone, onClose }: Props) {
 
         if (resultado) {
           setBudgetModal(true)
-          setMensagem('Código enviado para seu WhatsApp')
+          toast({
+            variant: 'default',
+            title: 'Código enviado para seu WhatsApp',
+          })
         } else {
-          setMensagem(resultado || 'Erro ao enviar código')
+          toast({
+            title: resultado || 'Erro ao enviar código',
+          })
         }
       } else {
         // Se o cliente não existe, cria o cliente e envia o OTP
@@ -180,15 +330,22 @@ export default function ClientForm({ telefone, onClose }: Props) {
 
           if (resultado) {
             setBudgetModal(true)
-            setMensagem('Código enviado para seu WhatsApp')
+            toast({
+              variant: 'default',
+              title: 'Código enviado para seu WhatsApp',
+            })
           } else {
-            setMensagem(resultado || 'Erro ao enviar código')
+            toast({
+              title: resultado || 'Erro ao enviar código',
+            })
           }
         }
       }
     } catch (error) {
       console.error('Erro ao processar formulário:', error)
-      setMensagem('Ocorreu um erro ao processar sua solicitação')
+      toast({
+        title: 'Ocorreu um erro ao processar sua solicitação',
+      })
     }
   }
 
@@ -200,28 +357,26 @@ export default function ClientForm({ telefone, onClose }: Props) {
         className="mb-4 w-28 h-28"
       />
       <Modal isVisible={openBudgetModal} onClose={() => setBudgetModal(false)}>
-        <label htmlFor="otp" className="text-sm font-medium">
-          Digite o código recebido
-        </label>
-        <InputOTP
-          maxLength={6}
-          value={codigo}
-          onChange={(val) => setCodigo(val)}
-        >
-          <InputOTPGroup>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <InputOTPSlot key={index} index={index} />
-            ))}
-          </InputOTPGroup>
-        </InputOTP>
-        {mensagem && (
-          <p className="text-sm text-muted-foreground text-center">
-            {mensagem}
-          </p>
-        )}
-        <Button onClick={verificarCodigo} className="w-full mt-2">
-          Verificar código
-        </Button>
+        <div className="flex flex-col items-center gap-4">
+          <label htmlFor="otp" className="text-sm font-medium">
+            Digite o código recebido
+          </label>
+          <InputOTP
+            maxLength={6}
+            value={codigo}
+            onChange={(val) => setCodigo(val)}
+          >
+            <InputOTPGroup>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <InputOTPSlot key={index} index={index} />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
+
+          <Button onClick={verificarCodigo} className="w-full mt-2">
+            Verificar código
+          </Button>
+        </div>
       </Modal>
 
       <Form {...form}>
@@ -276,15 +431,11 @@ export default function ClientForm({ telefone, onClose }: Props) {
                         <SelectValue placeholder="Escolha o serviço" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Faxineira">Faxineira</SelectItem>
-                        <SelectItem value="Eletricista">Eletricista</SelectItem>
-                        <SelectItem value="Pintor">Pintor</SelectItem>
-                        <SelectItem value="Montador de Móveis">
-                          Montador de Móveis
-                        </SelectItem>
-                        <SelectItem value="Jardineiro">Jardineiro</SelectItem>
-                        <SelectItem value="Pedreiro">Pedreiro</SelectItem>
-                        <SelectItem value="Freteiro">Freteiro</SelectItem>
+                        {tiposServico.map((tipo) => (
+                          <SelectItem key={tipo.id} value={tipo.nome}>
+                            {tipo.nome}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -300,7 +451,19 @@ export default function ClientForm({ telefone, onClose }: Props) {
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nome completo" {...field} />
+                    <IMaskInput
+                      placeholder="Nome completo"
+                      {...field}
+                      className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
+                      onAccept={(value: string) => {
+                        field.onChange(value)
+                        setUserData({
+                          ...userData,
+                          nome: value,
+                        })
+                      }}
+                      value={userData.nome || ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -319,7 +482,14 @@ export default function ClientForm({ telefone, onClose }: Props) {
                       mask="000.000.000-00"
                       placeholder="000.000.000-00"
                       className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
-                      onAccept={(value: string) => field.onChange(value)}
+                      onAccept={(value: string) => {
+                        field.onChange(value)
+                        setUserData({
+                          ...userData,
+                          cpf: value,
+                        })
+                      }}
+                      value={userData.cpf || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -334,7 +504,15 @@ export default function ClientForm({ telefone, onClose }: Props) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Email" {...field} />
+                    {!userData.email ? (
+                      <Input placeholder="Email" {...field} />
+                    ) : (
+                      <Input
+                        placeholder="Email"
+                        {...field}
+                        value={userData.email || ''}
+                      />
+                    )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -353,7 +531,11 @@ export default function ClientForm({ telefone, onClose }: Props) {
                       mask="00000-000"
                       placeholder="29900-240"
                       className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
-                      onAccept={(value: string) => field.onChange(value)}
+                      onAccept={(value: string) => {
+                        field.onChange(value)
+                        setCep(value.replace(/\D/g, ''))
+                      }}
+                      value={cep}
                     />
                   </FormControl>
                   <FormMessage />
@@ -381,28 +563,12 @@ export default function ClientForm({ telefone, onClose }: Props) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data Agendada</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Data Agendada" {...field} />
-                  </FormControl>
+                  <DayPicker value={field.value} onChange={field.onChange} />
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-
-          <FormField
-            control={form.control}
-            name="complemento"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Complemento</FormLabel>
-                <FormControl>
-                  <Input placeholder="Complemento" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <FormField
@@ -462,6 +628,20 @@ export default function ClientForm({ telefone, onClose }: Props) {
             />
           </div>
 
+          <FormField
+            control={form.control}
+            name="complemento"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Complemento</FormLabel>
+                <FormControl>
+                  <Input placeholder="Complemento" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormDescription className="mb-4">
             * Seu endereço será compartilhado apenas com um dos nossos parceiros
             após a sua confirmação do serviço.
@@ -503,7 +683,11 @@ export default function ClientForm({ telefone, onClose }: Props) {
                       className="block w-full text-sm text-gray-500
                     file:py-2 file:px-4 file:rounded-md file:border file:border-gray-300
                     file:bg-gray-50 file:text-gray-700 file:cursor-pointer"
-                      onChange={(e) => onChange(e.target.files)}
+                      onChange={(e) => {
+                        // Captura o primeiro arquivo selecionado
+                        const file = e.target.files?.[0] || null
+                        onChange(file)
+                      }}
                       ref={ref}
                     />
                   </FormControl>
