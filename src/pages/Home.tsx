@@ -39,7 +39,7 @@ export default function Home() {
             isVisible={openBudgetModal}
             onClose={() => setBudgetModal(false)}
           >
-            <ClientForm />
+            <ClientForm onClose={() => setBudgetModal(false)} />
           </Modal>
           <Button onClick={() => setPartnerModal(true)}>
             SEJA NOSSO PARCEIRO
