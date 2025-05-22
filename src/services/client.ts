@@ -5,6 +5,7 @@ interface Cliente {
   telefone: string
   nome: string
   email: string
+  cpf: string
   enderecos: {
     create: {
       cep: string

@@ -19,6 +19,7 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/card'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const tipoServicoMap: Record<number, string> = {
   1: 'Faxineira',
@@ -500,13 +501,15 @@ export default function ClientServicesPage() {
           isVisible={modalCadastroAberto}
           onClose={() => setModalCadastroAberto(false)}
         >
-          <ClientForm
-            telefone={telefoneLogado}
-            onClose={() => {
-              setModalCadastroAberto(false)
-              carregarServicos()
-            }}
-          />
+          <ErrorBoundary>
+            <ClientForm
+              telefone={telefoneLogado}
+              onClose={() => {
+                setModalCadastroAberto(false)
+                carregarServicos()
+              }}
+            />
+          </ErrorBoundary>
         </Modal>
       </div>
 

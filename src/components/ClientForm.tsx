@@ -58,6 +58,48 @@ interface Cliente {
 }
 
 export default function ClientForm({ telefone, onClose }: Props) {
+  const form = useForm<ClientFormData>({
+    defaultValues: {
+      telefone: '',
+      servico: '',
+      nome: '',
+      email: '',
+      cep: '',
+      logradouro: '',
+      dataAgendada: '',
+      complemento: '',
+      numero: '',
+      bairro: '',
+      cidade: '',
+      estado: '',
+      descricao: '',
+      foto: null,
+      tamanhoImovel: '',
+      tipoLimpeza: '',
+      frequencia: '',
+      horario: '',
+      extras: '',
+
+      tipoImovel: '',
+      superficie: '',
+      condicao: '',
+      prazo: '',
+
+      tipoServicoEletrico: '',
+      descricaoProblema: '',
+
+      descricaoMoveis: '',
+      quantidadeMoveis: 0,
+
+      descricaoServicoPedreiro: '',
+      areaMetragem: '',
+
+      descricaoItens: '',
+      origemDestino: '',
+    },
+  })
+
+  const { toast } = useToast()
   const [openBudgetModal, setBudgetModal] = useState(false)
   const [codigo, setCodigo] = useState('')
   const { login } = useAuth()
@@ -71,7 +113,35 @@ export default function ClientForm({ telefone, onClose }: Props) {
   })
   const [cep, setCep] = useState('')
   const servicosComDescricaoEspecifica = ['Eletricista', 'Pedreiro']
-  const { toast } = useToast()
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = Cookies.get('token')
+        if (token) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const decoded: any = jwtDecode(token)
+          const userId = decoded.id
+          const { data } = await api.get(`/clientes/${userId}`)
+          setUserData({
+            nome: data.data.nome,
+            cpf: data.data.cpf,
+            email: data.data.email,
+          })
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do cliente', error)
+      }
+    }
+
+    fetchUserData()
+  }, [])
+
+  useEffect(() => {
+    if (userData.nome) form.setValue('nome', userData.nome)
+    if (userData.email) form.setValue('email', userData.email)
+    if (userData.cpf) form.setValue('cpf', userData.cpf)
+  }, [userData, form])
 
   useEffect(() => {
     if (cep.length === 8) {
@@ -84,26 +154,10 @@ export default function ClientForm({ telefone, onClose }: Props) {
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .catch((error: any) => {
-          toast({
-            title: error.message,
-          })
+          toast({ title: error.message })
         })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cep])
-
-  useEffect(() => {
-    console.log('Validando CPF')
-    if (userData.cpf.length === 14 && !validaCpf(userData.cpf)) {
-      toast({
-        title: 'Digite um CPF válido.',
-      })
-      setUserData({
-        ...userData,
-        cpf: '',
-      })
-    }
-  }, [toast, userData, userData.cpf])
+  }, [cep, form, toast])
 
   useEffect(() => {
     const fetchTipos = async () => {
@@ -120,41 +174,16 @@ export default function ClientForm({ telefone, onClose }: Props) {
       }
     }
 
-    const fetchUserData = async () => {
-      try {
-        const token = Cookies.get('token')
-        if (token) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const decoded: any = jwtDecode(token)
-          const userId = decoded.id
-
-          const { data } = await api.get(`/clientes/${userId}`)
-          console.log('cliente logado: ', data)
-          setUserData({
-            nome: data.data.nome,
-            cpf: data.data.cpf,
-            email: data.data.email,
-          })
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados do cliente', error)
-      }
-    }
-
     fetchTipos()
-    fetchUserData()
   }, [])
 
   const verificarCodigo = async () => {
     const telefoneLimpo = phone.replace(/\D/g, '')
-    console.log('verificar codigo ' + telefoneLimpo)
-
     try {
       const { data } = await api.post('/auth/verificar-otp', {
         telefone: telefoneLimpo,
         codigo,
       })
-      console.log('Verificar OTP', { data })
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
         login('client', data.token)
@@ -198,47 +227,6 @@ export default function ClientForm({ telefone, onClose }: Props) {
 
   const [servicoSlecionado, setServicoSelecionado] = useState('')
 
-  const form = useForm<ClientFormData>({
-    defaultValues: {
-      telefone: '',
-      servico: '',
-      nome: '',
-      email: '',
-      cep: '',
-      logradouro: '',
-      dataAgendada: '',
-      complemento: '',
-      numero: '',
-      bairro: '',
-      cidade: '',
-      estado: '',
-      descricao: '',
-      foto: null,
-      tamanhoImovel: '',
-      tipoLimpeza: '',
-      frequencia: '',
-      horario: '',
-      extras: '',
-
-      tipoImovel: '',
-      superficie: '',
-      condicao: '',
-      prazo: '',
-
-      tipoServicoEletrico: '',
-      descricaoProblema: '',
-
-      descricaoMoveis: '',
-      quantidadeMoveis: 0,
-
-      descricaoServicoPedreiro: '',
-      areaMetragem: '',
-
-      descricaoItens: '',
-      origemDestino: '',
-    },
-  })
-
   const prepareFormData = (data: ClientFormData): FormData | ClientFormData => {
     if (!data.nome && userData.nome) {
       data.nome = userData.nome
@@ -260,7 +248,6 @@ export default function ClientForm({ telefone, onClose }: Props) {
   }
 
   const onSubmit = async (data: ClientFormData) => {
-    console.log('onSubmit', data)
     try {
       const formData = prepareFormData(data)
       // Limpa o telefone para remover caracteres especiais
@@ -269,6 +256,16 @@ export default function ClientForm({ telefone, onClose }: Props) {
 
       // Checagem se já está logado como Cliente
       const token = Cookies.get('token')
+
+      if (!token) {
+        if (!data.cpf || data.cpf.length < 14 || !validaCpf(data.cpf)) {
+          toast({
+            title: 'CPF inválido. Por favor, verifique e tente novamente.',
+          })
+          return
+        }
+      }
+
       if (token) {
         await criarServico(formData)
         toast({
@@ -309,6 +306,7 @@ export default function ClientForm({ telefone, onClose }: Props) {
           telefone: telefoneLimpo,
           nome: data.nome,
           email: data.email,
+          cpf: data.cpf,
           enderecos: {
             create: {
               cep: data.cep,
@@ -455,14 +453,7 @@ export default function ClientForm({ telefone, onClose }: Props) {
                       placeholder="Nome completo"
                       {...field}
                       className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
-                      onAccept={(value: string) => {
-                        field.onChange(value)
-                        setUserData({
-                          ...userData,
-                          nome: value,
-                        })
-                      }}
-                      value={userData.nome || ''}
+                      onAccept={(value: string) => field.onChange(value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -482,14 +473,7 @@ export default function ClientForm({ telefone, onClose }: Props) {
                       mask="000.000.000-00"
                       placeholder="000.000.000-00"
                       className="flex h-10 w-full rounded-md border border-orange bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm'"
-                      onAccept={(value: string) => {
-                        field.onChange(value)
-                        setUserData({
-                          ...userData,
-                          cpf: value,
-                        })
-                      }}
-                      value={userData.cpf || ''}
+                      onAccept={(value: string) => field.onChange(value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -504,15 +488,7 @@ export default function ClientForm({ telefone, onClose }: Props) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    {!userData.email ? (
-                      <Input placeholder="Email" {...field} />
-                    ) : (
-                      <Input
-                        placeholder="Email"
-                        {...field}
-                        value={userData.email || ''}
-                      />
-                    )}
+                    <Input placeholder="Email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
