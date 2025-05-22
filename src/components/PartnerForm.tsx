@@ -514,7 +514,9 @@ export default function PartnerForm() {
                     accept="image/png, image/jpg"
                     onChange={(e) => onChange(e.target.files)}
                     ref={ref}
-                    className="file-input"
+                    className="block w-full text-sm text-gray-500
+                    file:py-2 file:px-4 file:rounded-md file:border file:border-gray-300
+                    file:bg-gray-50 file:text-gray-700 file:cursor-pointer"
                   />
                 </FormControl>
                 <FormMessage />
