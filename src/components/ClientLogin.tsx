@@ -81,7 +81,6 @@ export default function ClientLogin({ onClose }: Props) {
         telefone: telefoneLimpo,
         codigo,
       })
-      console.log('Verificar OTP', { data })
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
         login('client', data.token)

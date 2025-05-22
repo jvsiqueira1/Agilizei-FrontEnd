@@ -27,8 +27,6 @@ export default function PartnerLogin({ onClose }: Props) {
         telefone: telefoneLimpo,
         tipo: 'parceiro',
       })
-      console.log('Resposta do enviar-otp:', data)
-
       if (data.sucesso) {
         setStep('otp')
         toast({
@@ -71,7 +69,6 @@ export default function PartnerLogin({ onClose }: Props) {
 
         setTimeout(() => {
           onClose()
-
           navigate('/parceiro')
         }, 1500)
       } else {

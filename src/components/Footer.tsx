@@ -33,7 +33,7 @@ export default function Footer() {
           <h2 className="text-lg font-bold mb-4">Contato</h2>
           <ul>
             <li>arsacompany.agilizei@gmail.com</li>
-            <li>(27) 99982-5511</li>
+            <li>(27) 99956-8341</li>
           </ul>
         </div>
         <div>
