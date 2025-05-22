@@ -33,6 +33,9 @@ export default function Services() {
   const [servicos, setServicos] = useState<
     { id: number; nome: string; descricao: string }[]
   >([])
+  const [selectedServico, setSelectedServico] = useState<string | undefined>(
+    undefined,
+  )
 
   useEffect(() => {
     const fetchServicos = async () => {
@@ -55,6 +58,11 @@ export default function Services() {
 
     fetchServicos()
   }, [])
+
+  const abrirFormComServico = (nomeServico: string) => {
+    setSelectedServico(nomeServico)
+    setClientModal('form')
+  }
 
   return (
     <>
@@ -79,6 +87,7 @@ export default function Services() {
              flex flex-col justify-between min-h-[150px] w-full mx-auto ${
                openMenu ? 'blur-sm pointer-events-none select-none' : ''
              }`}
+            onClick={() => abrirFormComServico(servico.nome)}
           >
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-white">
@@ -122,7 +131,10 @@ export default function Services() {
 
       <Modal isVisible={!!clientModal} onClose={() => setClientModal(false)}>
         {clientModal === 'form' && (
-          <ClientForm onClose={() => setClientModal(false)} />
+          <ClientForm
+            onClose={() => setClientModal(false)}
+            selectedServico={selectedServico}
+          />
         )}
         {clientModal === 'outros' && (
           <OtherServices onClose={() => setClientModal(false)} />

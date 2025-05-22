@@ -49,6 +49,7 @@ interface TipoServico {
 interface Props {
   telefone?: string
   onClose: () => void
+  selectedServico?: string
 }
 
 interface Cliente {
@@ -57,11 +58,15 @@ interface Cliente {
   email: string
 }
 
-export default function ClientForm({ telefone, onClose }: Props) {
+export default function ClientForm({
+  telefone,
+  onClose,
+  selectedServico,
+}: Props) {
   const form = useForm<ClientFormData>({
     defaultValues: {
       telefone: '',
-      servico: '',
+      servico: selectedServico || '',
       nome: '',
       email: '',
       cep: '',
@@ -225,7 +230,11 @@ export default function ClientForm({ telefone, onClose }: Props) {
     }
   }
 
-  const [servicoSlecionado, setServicoSelecionado] = useState('')
+  useEffect(() => {
+    if (selectedServico) {
+      form.setValue('servico', selectedServico)
+    }
+  }, [selectedServico, form])
 
   const prepareFormData = (data: ClientFormData): FormData | ClientFormData => {
     if (!data.nome && userData.nome) {
@@ -347,6 +356,8 @@ export default function ClientForm({ telefone, onClose }: Props) {
     }
   }
 
+  const servicoAtual = form.watch('servico')
+
   return (
     <div className="flex flex-col items-center">
       <img
@@ -421,9 +432,8 @@ export default function ClientForm({ telefone, onClose }: Props) {
                     <Select
                       onValueChange={(value) => {
                         form.setValue('servico', value)
-                        setServicoSelecionado(value)
                       }}
-                      value={form.getValues('servico') || ''}
+                      value={servicoAtual || ''}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Escolha o serviço" />
@@ -623,9 +633,9 @@ export default function ClientForm({ telefone, onClose }: Props) {
             após a sua confirmação do serviço.
           </FormDescription>
 
-          <SpecificFields servico={servicoSlecionado} control={form.control} />
+          <SpecificFields servico={servicoAtual} control={form.control} />
 
-          {!servicosComDescricaoEspecifica.includes(servicoSlecionado) && (
+          {!servicosComDescricaoEspecifica.includes(servicoAtual) && (
             <FormField
               control={form.control}
               name="descricao"
