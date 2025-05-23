@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/services/api'
 import { jwtDecode } from 'jwt-decode'
-import { Footer, Modal } from '@/components'
+import { Footer, Modal, LoginHeader } from '@/components'
 import {
   Card,
   CardContent,
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Cookies from 'js-cookie'
 import { formatarData } from '@/lib/formatData'
-import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/useAuth'
 import { useToast } from '@/components/hooks/use-toast'
@@ -154,7 +153,7 @@ export default function PartnerPage() {
   const [descricao, setDescricao] = useState('')
   const [precisaVisitaTecnica, setPrecisaVisitaTecnica] = useState(false)
   const [dataVisitaTecnica, setDataVisitaTecnica] = useState('')
-
+  const [userName, setUserName] = useState('')
   const navigate = useNavigate()
   const { logout } = useAuth()
   const decodedToken = jwtDecode<JwtPayload>(Cookies.get('token') || '')
@@ -163,6 +162,7 @@ export default function PartnerPage() {
 
   const handleLogout = () => {
     Cookies.remove('token')
+    Cookies.remove('nome')
     logout()
     navigate('/')
   }
@@ -265,21 +265,16 @@ export default function PartnerPage() {
     }
   }
 
+  useEffect(() => {
+    const nomeCookie = Cookies.get('nome')
+    if (nomeCookie) setUserName(nomeCookie)
+  }, [])
+
   return (
     <>
-      <header className="flex justify-center py-5">
-        <h1 className="text-orange text-4xl font-bold">
-          Bem-vindo ao perfil do parceiro Agilizei
-        </h1>
-      </header>
-
+      <LoginHeader nome={userName} isCliente={false} onLogout={handleLogout} />
       <div className="w-full max-w-[1440px] mx-auto bg-light-gray flex flex-col py-2 px-4 min-h-screen">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold my-4">Serviços disponíveis</h1>
-          <Button onClick={handleLogout}>
-            <ArrowLeft /> Sair
-          </Button>
-        </div>
+        <h1 className="text-2xl font-bold my-4">Serviços disponíveis</h1>
 
         {parceiroInativo ? (
           <div className="bg-red-100 text-red-700 border border-red-300 p-4 rounded max-w-xl mx-auto text-center">
@@ -287,7 +282,7 @@ export default function PartnerPage() {
             serviços disponíveis.
           </div>
         ) : (
-          <div className="grid grid-flow-row md:grid-flow-col justify-start gap-6 w-full">
+          <div className="grid grid-flow-row md:grid-flow-col md:justify-start justify-center gap-6 w-full">
             {servicos.map((servico) => {
               const desabilitarBotao =
                 servico.orcamentos.some(
@@ -312,7 +307,7 @@ export default function PartnerPage() {
               return (
                 <Card
                   key={servico.id}
-                  className="max-w-lg w-full mx-auto min-w-[450px] min-h-[100px]"
+                  className="max-w-lg w-full mx-auto md:min-w-[450px] min-h-[100px]"
                 >
                   <CardHeader className="flex items-center justify-between pb-2">
                     <CardTitle className="text-lg">

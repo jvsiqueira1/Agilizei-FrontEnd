@@ -4,11 +4,10 @@ import { jwtDecode } from 'jwt-decode'
 import { Footer, Modal, ClientForm } from '@/components'
 import Cookies from 'js-cookie'
 import { formatarData } from '@/lib/formatData'
-import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/useAuth'
 import { useToast } from '../components/hooks/use-toast'
-
+import { LoginHeader } from '@/components'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -180,6 +179,7 @@ export default function ClientServicesPage() {
   )
   const [servicos, setServicos] = useState<Servico[]>([])
   const [telefoneLogado, setTelefoneLogado] = useState<string>('')
+  const [userName, setUserName] = useState('')
 
   const navigate = useNavigate()
   const { logout } = useAuth()
@@ -187,6 +187,7 @@ export default function ClientServicesPage() {
 
   const handleLogout = () => {
     Cookies.remove('token')
+    Cookies.remove('nome')
     logout()
     navigate('/')
   }
@@ -230,25 +231,23 @@ export default function ClientServicesPage() {
     setModalAberto(true)
   }
 
+  useEffect(() => {
+    const nomeCookie = Cookies.get('nome')
+    if (nomeCookie) setUserName(nomeCookie)
+  }, [])
+
   return (
     <>
-      <header className="flex justify-center py-5">
-        <h1 className="text-orange text-4xl font-bold">
-          Bem vindo ao perfil do cliente Agilizei
-        </h1>
-      </header>
+      <LoginHeader
+        nome={userName}
+        isCliente={true}
+        onNovoServico={() => setModalCadastroAberto(true)}
+        onLogout={handleLogout}
+      />
 
       <div className="w-full max-w-[1440px] mx-auto bg-light-gray flex flex-col py-2 px-4 min-h-screen">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold my-4">Meus serviços</h1>
-          <div className="flex gap-4">
-            <Button onClick={() => setModalCadastroAberto(true)}>
-              Novo Serviço
-            </Button>
-            <Button onClick={handleLogout}>
-              <ArrowLeft /> Sair
-            </Button>
-          </div>
         </div>
 
         <Tabs

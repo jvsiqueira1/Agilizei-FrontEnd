@@ -83,6 +83,7 @@ export default function ClientLogin({ onClose }: Props) {
       })
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
+        Cookies.set('nome', data.usuario.nome)
         login('client', data.token)
         toast({
           variant: 'default',

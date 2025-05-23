@@ -64,6 +64,7 @@ export default function PartnerLogin({ onClose }: Props) {
 
       if (data.sucesso && data.token && data.usuario) {
         Cookies.set('token', data.token, { expires: 1 })
+        Cookies.set('nome', data.usuario.nome)
         login('partner', data.token)
         toast({ variant: 'default', title: 'Login realizado com sucesso!' })
 
