@@ -57,7 +57,7 @@ export default function About() {
             </p>
           </div>
         </section>
-        <section className="bg-white p-8 rounded-lg text-center">
+        <section className="bg-light-gray p-8 rounded-lg text-center">
           <h2 className="text-3xl font-semibold text-center mb-6">
             Nossos Valores
           </h2>
