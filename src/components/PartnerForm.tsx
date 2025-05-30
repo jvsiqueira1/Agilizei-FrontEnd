@@ -544,6 +544,15 @@ export default function PartnerForm() {
                     >
                       Termos de Uso
                     </a>
+                    e as
+                    <a
+                      href="/PolíticadePrivacidade.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      Política de Privacidade
+                    </a>
                   </label>
                 </FormControl>
                 <FormMessage />
