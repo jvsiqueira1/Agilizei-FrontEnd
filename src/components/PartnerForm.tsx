@@ -34,6 +34,10 @@ import { useAuth } from '@/contexts/useAuth'
 import { useToast } from '@/components/hooks/use-toast'
 import { validaCpfCnpj } from '@/lib/validations'
 
+interface Props {
+  telefone?: string
+}
+
 // Função para verificar a validade da data de nascimento
 const isValidDate = (dateString: string) => {
   const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/
@@ -75,7 +79,7 @@ const tipoServicoMap: Record<string, number> = {
   Pedreiro: 7,
 }
 
-export default function PartnerForm() {
+export default function PartnerForm( { telefone }: Props) {
   const [otp, setOtp] = useState('')
   const [openOtpModal, setOpenOtpModal] = useState(false)
   const [isValidAge, setIsValidAge] = useState(true)
@@ -91,7 +95,7 @@ export default function PartnerForm() {
       email: '',
       cpfCnpj: '',
       dataNascimento: '',
-      telefone: '',
+      telefone: telefone ||'',
       cep: '',
       logradouro: '',
       numero: '',

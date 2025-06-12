@@ -267,7 +267,7 @@ export default function AdminPartner() {
                 </Button>
               </TableCell>
               <TableCell>{parceiro.email}</TableCell>
-              <TableCell>{formatTelefone(parceiro.telefone)}</TableCell>
+              <TableCell><a href={`https://wa.me/${parceiro.telefone.replace(/\D/g, '').startsWith('55') ? parceiro.telefone.replace(/\D/g, '') : `55${parceiro.telefone.replace(/\D/g, '')}`}`} target='_blank' rel='noopener noreferrer'>{formatTelefone(parceiro.telefone)}</a></TableCell>
               <TableCell>{parceiro.active ? 'Ativo' : 'Inativo'}</TableCell>
               <TableCell>
                 <Switch

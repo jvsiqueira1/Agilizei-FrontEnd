@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/useAuth'
 export default function Admin() {
   const { userRole } = useAuth()
   const [showAdminModal, setShowAdminModal] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -21,9 +22,16 @@ export default function Admin() {
   }
 
   return (
-    <div className="flex">
-      <AdminSidebar />
-      <main className="flex-1 p-6">
+    <div className="flex flex-col md:flex-row min-h-screen">
+       {/* Botão de menu só no mobile */}
+       <button
+        className="md:hidden p-4 bg-muted text-sm text-left"
+        onClick={() => setSidebarOpen(true)}
+      >
+        ☰ Menu
+      </button>
+      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main className="flex-1 p-4 md:p-6">
         <Outlet />
       </main>
 

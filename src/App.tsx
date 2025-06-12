@@ -8,6 +8,7 @@ import {
   AdminServicesType,
 } from '@/components'
 import { PrivateRoute } from '@/contexts/PrivateRoute'
+import OutrosServicosPage from './components/admin/OutrosServicosPage'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="servicos" element={<AdminServices />} />
           <Route path="tipos" element={<AdminServicesType />} />
           <Route path="criar-admin" element={<AdminCreate />} />
+          <Route path="outros-servicos" element={<OutrosServicosPage />} />
         </Route>
         <Route
           path="/cliente"

@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
-import { ClientFormData } from '@/types'
+import { clientSchema, ClientFormData } from '@/schemas/clientSchema'
 import { Controller } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import SpecificFields from './SpecificFields'
@@ -38,6 +38,7 @@ import { getCep, Endereco } from '@/services/cepService'
 import { validaCpf } from '@/lib/validations'
 import { useToast } from '@/components/hooks/use-toast'
 import { DayPicker } from '@/components'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 interface TipoServico {
   id: number
@@ -64,6 +65,7 @@ export default function ClientForm({
   selectedServico,
 }: Props) {
   const form = useForm<ClientFormData>({
+    resolver: zodResolver(clientSchema),
     defaultValues: {
       telefone: '',
       servico: selectedServico || '',
@@ -94,7 +96,7 @@ export default function ClientForm({
       descricaoProblema: '',
 
       descricaoMoveis: '',
-      quantidadeMoveis: 0,
+      quantidadeMoveis: undefined,
 
       descricaoServicoPedreiro: '',
       areaMetragem: '',

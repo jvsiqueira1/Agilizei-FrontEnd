@@ -30,7 +30,6 @@ export default function ClientLogin({ onClose }: Props) {
   //Verificar se o usuário existe no banco de dados
   const verificarUsuario = async (telefoneCliente: string) => {
     try {
-      console.log('verificarUsuario sujo', telefoneCliente)
       const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
       const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
       console.log('dataUserVerificaUsuario', data.data.telefone)

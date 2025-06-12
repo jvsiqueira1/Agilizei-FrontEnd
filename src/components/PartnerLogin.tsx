@@ -7,18 +7,51 @@ import { api } from '@/services/api'
 import { useAuth } from '@/contexts/useAuth'
 import Cookies from 'js-cookie'
 import { useToast } from '@/components/hooks/use-toast'
+import { PartnerForm } from './index'
+import Modal from './Modal'
+
 
 interface Props {
   onClose: () => void
 }
 
 export default function PartnerLogin({ onClose }: Props) {
+  const [openPartnerFormModal, setOpenPartnerFormModal] = useState(false);
   const [telefone, setTelefone] = useState('')
   const [step, setStep] = useState<'telefone' | 'otp'>('telefone')
   const [codigo, setCodigo] = useState('')
   const navigate = useNavigate()
   const { login } = useAuth()
   const { toast } = useToast()
+
+  const verificarParceiro = async () => {
+    const telefoneLimpo = telefone.replace(/\D/g, '');
+    try {
+      const { data } = await api.get(`/profissionais/telefone/${telefoneLimpo}`);
+      console.log('dataUserVerificaParceiro', data.data.telefone);
+      if (data && data.data && data.data.telefone) {
+        await enviarCodigo();
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(error);
+      if (error.response?.status === 404) {
+        setOpenPartnerFormModal(true);
+        toast({
+          title: 'Telefone não cadastrado como parceiro.',
+          description: 'Por favor, verifique o número digitado ou entre em contato.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Erro ao verificar o telefone.',
+          description: error.response?.data?.erro || 'Tente novamente mais tarde.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+  
 
   const enviarCodigo = async () => {
     const telefoneLimpo = telefone.replace(/\D/g, '')
@@ -99,7 +132,7 @@ export default function PartnerLogin({ onClose }: Props) {
             className="w-full px-3 py-2 border rounded-md"
           />
           <Button
-            onClick={enviarCodigo}
+            onClick={verificarParceiro}
             className="w-full"
             disabled={telefone.replace(/\D/g, '').length < 11}
           >
@@ -129,6 +162,10 @@ export default function PartnerLogin({ onClose }: Props) {
           </Button>
         </>
       )}
+
+      <Modal isVisible={openPartnerFormModal} onClose={() => setOpenPartnerFormModal(false)}>
+        <PartnerForm telefone={telefone} />
+      </Modal>
     </div>
   )
 }

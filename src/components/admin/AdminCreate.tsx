@@ -60,7 +60,7 @@ export default function AdminCreate() {
             name="nome"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Nome</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Nome"

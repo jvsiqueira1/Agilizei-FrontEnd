@@ -7,7 +7,7 @@ import {
   FormControl,
   FormMessage,
 } from './ui/form'
-import { ClientFormData } from '@/types'
+import { ClientFormData } from '@/schemas/clientSchema'
 import { Control } from 'react-hook-form'
 
 interface Props {
