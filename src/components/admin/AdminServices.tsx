@@ -156,7 +156,7 @@ export default function AdminServices() {
 
   return (
     <div className="p-6">
-      <div className="mb-4 flex items-center gap-4">
+      <div className="mb-4 flex flex-col md:flex-row items-start md:items-center gap-4">
         <label htmlFor="filtroTipoServico" className="font-semibold">
           Filtrar por tipo de serviço:
         </label>
