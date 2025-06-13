@@ -15,7 +15,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
 
   return (
     <aside className={`
-        fixed md:static top-0 left-0 h-full w-64 bg-muted p-6 z-50 transition-transform space-y-4
+        fixed md:static top-0 left-0 h-screen w-64 bg-muted p-6 z-50 transition-transform space-y-4
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
         md:translate-x-0
       `}>

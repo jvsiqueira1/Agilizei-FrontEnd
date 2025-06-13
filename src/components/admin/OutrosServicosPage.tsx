@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/services/api'
 import { format } from 'date-fns'
+import { Button } from '@/components/ui/button'
 
 interface ContatoOutrosServicos {
   id: number
@@ -35,6 +36,18 @@ export default function OutrosServicosPage() {
     fetchContatos()
   }, [])
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Tem certeza que deseja deletar este serviço sugerido?')) return
+
+    try {
+      await api.delete(`/outros-servicos/${id}`)
+      setContatos((prev) => prev.filter((item) => item.id !== id))
+    } catch (err) {
+      console.error('Erro ao deletar serviço sugerido:', err)
+      setErro('Erro ao deletar o serviço sugerido.')
+    }
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Outros Serviços</h1>
@@ -55,6 +68,7 @@ export default function OutrosServicosPage() {
                 <th className="p-2 border-b">Tipo de Serviço</th>
                 <th className="p-2 border-b">Descrição</th>
                 <th className="p-2 border-b">Data</th>
+                <th className="p-2 border-b">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -73,7 +87,10 @@ export default function OutrosServicosPage() {
                   <td className="p-2">{item.tipoServico}</td>
                   <td className="p-2 whitespace-pre-wrap max-w-xs">{item.descricao}</td>
                   <td className="p-2">
-                    {format(new Date(item.createdAt), 'dd/MM/yyyy HH:mm')}
+                    {format(new Date(item.createdAt), 'dd/MM/yyyy')}
+                  </td>
+                  <td className='p-2'>
+                    <Button onClick={() => handleDelete(item.id)} variant='destructive'>Deletar</Button>
                   </td>
                 </tr>
               ))}
