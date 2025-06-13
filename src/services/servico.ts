@@ -1,4 +1,4 @@
-import { ClientFormData } from '@/types/ClientFormTypes'
+import { ClientFormData } from '@/schemas/clientSchema'
 import { api } from './api'
 
 export const criarServico = async (data: ClientFormData | FormData) => {
