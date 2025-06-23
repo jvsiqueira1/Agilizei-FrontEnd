@@ -259,7 +259,9 @@ export default function EditClientModal({
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit">Salvar Cliente</Button>
+            <Button type="submit" className="bg-black hover:bg-opacity-70 ml-2">
+              Salvar Cliente
+            </Button>
           </div>
         </form>
       </div>

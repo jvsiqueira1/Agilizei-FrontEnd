@@ -32,26 +32,28 @@ interface Servico {
 }
 
 interface Orcamento {
-  id: number;
-  valor: number;
-  descricao: string;
-  status: string;
+  id: number
+  valor: number
+  descricao: string
+  status: string
   profissional: {
-    nome: string;
-    telefone: string;
-  };
+    nome: string
+    telefone: string
+  }
 }
 
 export default function AdminServices() {
   const [servicos, setServicos] = useState<Servico[]>([])
   const [tiposServico, setTiposServico] = useState<TipoServico[]>([])
-  const [filtroTipoServico, setFiltroTipoServico] = useState<number | null>(null)
+  const [filtroTipoServico, setFiltroTipoServico] = useState<number | null>(
+    null,
+  )
   const [filtroStatus, setFiltroStatus] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const PAGE_SIZE = 9
 
-  const [selectedServico, setSelectedServico] = useState<Servico | null>(null);
+  const [selectedServico, setSelectedServico] = useState<Servico | null>(null)
 
   const statusMap: Record<string, { label: string; style: string }> = {
     PENDENTE: {
@@ -122,18 +124,18 @@ export default function AdminServices() {
 
   const handleServicoClick = async (servicoId: number) => {
     try {
-      const response = await api.get(`/servicos/${servicoId}`);
-      const servicoDetalhado = response.data.data ?? response.data;
+      const response = await api.get(`/servicos/${servicoId}`)
+      const servicoDetalhado = response.data.data ?? response.data
       setSelectedServico(servicoDetalhado)
-      console.log('Serviço selecionado:', servicoDetalhado);
+      console.log('Serviço selecionado:', servicoDetalhado)
     } catch (error) {
-      console.error('Erro ao buscar detalhes do serviço:', error);
+      console.error('Erro ao buscar detalhes do serviço:', error)
     }
-  };
+  }
 
   const closeModal = () => {
-    setSelectedServico(null);
-  };
+    setSelectedServico(null)
+  }
 
   function getStatusBadge(status: string) {
     const statusInfo = statusMap[status.toUpperCase()] ?? statusMap.DEFAULT
@@ -141,13 +143,15 @@ export default function AdminServices() {
   }
 
   const getWhatsappLink = (telefone: string | undefined) => {
-    if (!telefone) return '#';
-    const telefoneLimpo = telefone.replace(/\D/g, '');
-    const telefoneComDDI = telefoneLimpo.startsWith('55') ? telefoneLimpo : `55${telefoneLimpo}`;
-    return `https://wa.me/${telefoneComDDI}`;
-  };
+    if (!telefone) return '#'
+    const telefoneLimpo = telefone.replace(/\D/g, '')
+    const telefoneComDDI = telefoneLimpo.startsWith('55')
+      ? telefoneLimpo
+      : `55${telefoneLimpo}`
+    return `https://wa.me/${telefoneComDDI}`
+  }
 
-  const servicosFiltrados = servicos.filter(servico => {
+  const servicosFiltrados = servicos.filter((servico) => {
     if (filtroStatus && servico.status !== filtroStatus) return false
     return true
   })
@@ -191,13 +195,15 @@ export default function AdminServices() {
             setPage(1)
           }}
         >
-            <option value="">Todos</option>
-            <option value="PENDENTE">Cliente aguardando orçamento</option>
-            <option value="AGUARDANDO_ESCOLHA_ORCAMENTO">Aguardando escolha</option>
-            <option value="AGENDADO">Serviço agendado</option>
-            <option value="CONCLUIDO">Concluído</option>
-            <option value="CANCELADO">Cancelado</option>
-          </select>
+          <option value="">Todos</option>
+          <option value="PENDENTE">Cliente aguardando orçamento</option>
+          <option value="AGUARDANDO_ESCOLHA_ORCAMENTO">
+            Aguardando escolha
+          </option>
+          <option value="AGENDADO">Serviço agendado</option>
+          <option value="CONCLUIDO">Concluído</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
       </div>
 
       {servicosFiltrados.length === 0 ? (
@@ -284,7 +290,9 @@ export default function AdminServices() {
       <Modal isVisible={!!selectedServico} onClose={closeModal}>
         {selectedServico && (
           <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">Detalhes do Serviço</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Detalhes do Serviço
+            </h2>
 
             <div className="space-y-4 text-gray-700">
               <p>
@@ -293,10 +301,14 @@ export default function AdminServices() {
               </p>
               <p>
                 <strong>Descrição:</strong>{' '}
-                {selectedServico.descricao || selectedServico.descricaoProblema || selectedServico.descricaoServicoPedreiro || 'N/A'}
+                {selectedServico.descricao ||
+                  selectedServico.descricaoProblema ||
+                  selectedServico.descricaoServicoPedreiro ||
+                  'N/A'}
               </p>
               <div>
-                <strong>Status:</strong> {getStatusBadge(selectedServico.status)}
+                <strong>Status:</strong>{' '}
+                {getStatusBadge(selectedServico.status)}
               </div>
               <p>
                 <strong>Cliente:</strong>{' '}
@@ -317,7 +329,9 @@ export default function AdminServices() {
                 {selectedServico.profissional?.nome || 'Nenhum'}
                 {selectedServico.profissional?.telefone && (
                   <a
-                    href={getWhatsappLink(selectedServico.profissional.telefone)}
+                    href={getWhatsappLink(
+                      selectedServico.profissional.telefone,
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="ml-2 text-blue-600 hover:underline"
@@ -329,17 +343,24 @@ export default function AdminServices() {
             </div>
 
             {/* Exibição dos Orçamentos */}
-            {selectedServico.orcamentos && selectedServico.orcamentos.length > 0 ? (
+            {selectedServico.orcamentos &&
+            selectedServico.orcamentos.length > 0 ? (
               <div className="mt-8">
                 <h3 className="text-xl font-bold mb-4">Orçamentos Recebidos</h3>
                 <div className="space-y-4">
                   {selectedServico.orcamentos.map((orcamento) => (
-                    <div key={orcamento.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
+                    <div
+                      key={orcamento.id}
+                      className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm"
+                    >
                       <p>
-                        <strong>Profissional:</strong> {orcamento.profissional?.nome || 'N/A'}
+                        <strong>Profissional:</strong>{' '}
+                        {orcamento.profissional?.nome || 'N/A'}
                         {orcamento.profissional?.telefone && (
                           <a
-                            href={getWhatsappLink(orcamento.profissional.telefone)}
+                            href={getWhatsappLink(
+                              orcamento.profissional.telefone,
+                            )}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="ml-2 text-blue-600 hover:underline"
@@ -356,10 +377,10 @@ export default function AdminServices() {
                         })}
                       </p>
                       <p>
-                        <strong>Descrição do Orçamento:</strong> {orcamento.descricao || 'N/A'}
+                        <strong>Descrição do Orçamento:</strong>{' '}
+                        {orcamento.descricao || 'N/A'}
                       </p>
-                      {/* AQUI: Mudei a <p> para <div> para conter o Badge */}
-                      <div> {/* Alterado de <p> para <div> */}
+                      <div>
                         <strong>Status do Orçamento:</strong>{' '}
                         <Badge
                           className={
@@ -367,7 +388,7 @@ export default function AdminServices() {
                               ? 'bg-green-500 text-white'
                               : orcamento.status === 'REJEITADO'
                                 ? 'bg-red-500 text-white'
-                                : 'bg-blue-300 text-blue-900' 
+                                : 'bg-blue-300 text-blue-900'
                           }
                         >
                           {orcamento.status || 'N/A'}
@@ -378,11 +399,16 @@ export default function AdminServices() {
                 </div>
               </div>
             ) : (
-              <p className="mt-8 text-gray-500 italic">Nenhum orçamento para este serviço.</p>
+              <p className="mt-8 text-gray-500 italic">
+                Nenhum orçamento para este serviço.
+              </p>
             )}
 
             <div className="flex justify-end mt-6">
-              <Button onClick={closeModal} className="bg-gray-500 hover:bg-gray-600 text-white">
+              <Button
+                onClick={closeModal}
+                className="bg-gray-500 hover:bg-gray-600 text-white"
+              >
                 Fechar
               </Button>
             </div>
