@@ -10,13 +10,12 @@ import { useToast } from '@/components/hooks/use-toast'
 import { PartnerForm } from './index'
 import Modal from './Modal'
 
-
 interface Props {
   onClose: () => void
 }
 
 export default function PartnerLogin({ onClose }: Props) {
-  const [openPartnerFormModal, setOpenPartnerFormModal] = useState(false);
+  const [openPartnerFormModal, setOpenPartnerFormModal] = useState(false)
   const [telefone, setTelefone] = useState('')
   const [step, setStep] = useState<'telefone' | 'otp'>('telefone')
   const [codigo, setCodigo] = useState('')
@@ -25,33 +24,33 @@ export default function PartnerLogin({ onClose }: Props) {
   const { toast } = useToast()
 
   const verificarParceiro = async () => {
-    const telefoneLimpo = telefone.replace(/\D/g, '');
+    const telefoneLimpo = telefone.replace(/\D/g, '')
     try {
-      const { data } = await api.get(`/profissionais/telefone/${telefoneLimpo}`);
-      console.log('dataUserVerificaParceiro', data.data.telefone);
+      const { data } = await api.get(`/profissionais/telefone/${telefoneLimpo}`)
       if (data && data.data && data.data.telefone) {
-        await enviarCodigo();
+        await enviarCodigo()
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
       if (error.response?.status === 404) {
-        setOpenPartnerFormModal(true);
+        setOpenPartnerFormModal(true)
         toast({
           title: 'Telefone não cadastrado como parceiro.',
-          description: 'Por favor, verifique o número digitado ou entre em contato.',
+          description:
+            'Por favor, verifique o número digitado ou entre em contato.',
           variant: 'destructive',
-        });
+        })
       } else {
         toast({
           title: 'Erro ao verificar o telefone.',
-          description: error.response?.data?.erro || 'Tente novamente mais tarde.',
+          description:
+            error.response?.data?.erro || 'Tente novamente mais tarde.',
           variant: 'destructive',
-        });
+        })
       }
     }
-  };
-  
+  }
 
   const enviarCodigo = async () => {
     const telefoneLimpo = telefone.replace(/\D/g, '')
@@ -163,7 +162,10 @@ export default function PartnerLogin({ onClose }: Props) {
         </>
       )}
 
-      <Modal isVisible={openPartnerFormModal} onClose={() => setOpenPartnerFormModal(false)}>
+      <Modal
+        isVisible={openPartnerFormModal}
+        onClose={() => setOpenPartnerFormModal(false)}
+      >
         <PartnerForm telefone={telefone} />
       </Modal>
     </div>

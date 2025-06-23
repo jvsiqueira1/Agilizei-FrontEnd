@@ -330,7 +330,10 @@ export default function ClientServicesPage() {
                     <div className="grid gap-1">
                       <p>
                         <strong>Descrição:</strong>{' '}
-                        {servicoSelecionado.descricao || 'Sem descrição'}
+                        {servicoSelecionado.descricao ||
+                          servicoSelecionado.descricaoProblema ||
+                          servicoSelecionado.descricaoServicoPedreiro ||
+                          'Sem descrição'}
                       </p>
                       <p>
                         <strong>Status:</strong>{' '}
