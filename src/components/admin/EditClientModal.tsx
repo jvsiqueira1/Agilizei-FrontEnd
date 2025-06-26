@@ -73,7 +73,7 @@ export default function EditClientModal({
     if (data.servicos) {
       data.servicos = data.servicos.map((s) => ({
         ...s,
-        dataAgendadda: s.dataAgendada
+        dataAgendada: s.dataAgendada
           ? new Date(s.dataAgendada).toISOString()
           : null,
       }))

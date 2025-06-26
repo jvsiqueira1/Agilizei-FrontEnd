@@ -1,5 +1,30 @@
 import { z } from 'zod'
 
+// Função para validar data no formato brasileiro (DD/MM/YYYY)
+const validateBrazilianDate = (dateString: string) => {
+  if (!dateString) return false
+
+  // Regex para formato DD/MM/YYYY
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/
+  const match = dateString.match(regex)
+
+  if (!match) return false
+
+  const day = parseInt(match[1], 10)
+  const month = parseInt(match[2], 10) - 1 // Mês começa em 0 no JavaScript
+  const year = parseInt(match[3], 10)
+
+  // Cria a data e verifica se é válida
+  const date = new Date(year, month, day)
+
+  return (
+    date.getDate() === day &&
+    date.getMonth() === month &&
+    date.getFullYear() === year &&
+    date >= new Date() // Data não pode ser no passado
+  )
+}
+
 export const clientSchema = z.object({
   telefone: z.string().min(14, 'Telefone é obrigatório'),
   servico: z.string().nonempty('Selecione um serviço'),
@@ -12,9 +37,10 @@ export const clientSchema = z.object({
   bairro: z.string().nonempty('Bairro obrigatório'),
   cidade: z.string().nonempty('Cidade obrigatória'),
   estado: z.string().nonempty('Estado obrigatório'),
-  dataAgendada: z
-    .string()
-    .refine(val => !isNaN(Date.parse(val)), { message: 'Data inválida' }),
+  dataAgendada: z.string().refine(validateBrazilianDate, {
+    message:
+      'Data inválida. Use o formato DD/MM/AAAA e certifique-se de que a data não é no passado.',
+  }),
   complemento: z.string(),
 
   descricao: z.string().optional(),

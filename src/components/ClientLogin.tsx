@@ -32,7 +32,6 @@ export default function ClientLogin({ onClose }: Props) {
     try {
       const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
       const { data } = await api.get(`/clientes/telefone/${telefoneLimpo}`)
-      console.log('dataUserVerificaUsuario', data.data.telefone)
       if (data) {
         setStep('otp')
         return enviarCodigo(data.data.telefone)
@@ -45,7 +44,6 @@ export default function ClientLogin({ onClose }: Props) {
 
   const enviarCodigo = async (telefoneCliente: string) => {
     const telefoneLimpo = telefoneCliente.replace(/\D/g, '')
-    console.log('enviar codigo!! ' + telefoneLimpo)
     try {
       const { data } = await api.post('/auth/enviar-otp', {
         telefone: telefoneLimpo,
@@ -73,7 +71,6 @@ export default function ClientLogin({ onClose }: Props) {
 
   const verificarCodigo = async () => {
     const telefoneLimpo = telefone.replace(/\D/g, '')
-    console.log('verificar codigo ' + telefoneLimpo)
 
     try {
       const { data } = await api.post('/auth/verificar-otp', {

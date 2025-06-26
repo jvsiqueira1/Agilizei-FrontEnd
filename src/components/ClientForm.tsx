@@ -246,6 +246,12 @@ export default function ClientForm({
       data.email = userData.email
     }
 
+    // Converte a data do formato brasileiro (DD/MM/YYYY) para ISO (YYYY-MM-DD)
+    if (data.dataAgendada) {
+      const [day, month, year] = data.dataAgendada.split('/')
+      data.dataAgendada = `${year}-${month}-${day}`
+    }
+
     if (data.foto) {
       const formData = new FormData()
       Object.entries(data).forEach(([key, value]) => {
@@ -259,6 +265,7 @@ export default function ClientForm({
   }
 
   const onSubmit = async (data: ClientFormData) => {
+    console.log(data.dataAgendada)
     try {
       const formData = prepareFormData(data)
       // Limpa o telefone para remover caracteres especiais
