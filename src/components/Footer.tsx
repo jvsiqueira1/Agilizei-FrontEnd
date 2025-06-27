@@ -1,16 +1,18 @@
-import { useEffect } from 'react'
-import { FaInstagram } from 'react-icons/fa'
-import { useMenu } from '@/contexts/useMenu'
+import { useEffect } from 'react';
+import { FaInstagram } from 'react-icons/fa';
+import { useMenu } from '@/contexts/useMenu';
 
 export default function Footer() {
-  const { openMenu } = useMenu()
+  const { openMenu } = useMenu();
+
   useEffect(() => {
-    document.body.style.overflowX = 'hidden'
+    document.body.style.overflowX = 'hidden';
 
     return () => {
-      document.body.style.overflowX = ''
-    }
-  }, [])
+      document.body.style.overflowX = '';
+    };
+  }, []);
+
   return (
     <footer
       className={`w-full bg-light-gray border-t-2 p-10 mb-6 md:px-16 overflow-x-hidden ${
@@ -18,27 +20,26 @@ export default function Footer() {
       }`}
     >
       <div className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div>
+        <div className="text-center">
           <img
             src="agilizeiLogo.svg"
             alt="Agilizei Logo"
-            className="mb-4 mt-1"
+            className="mb-4 mt-1 mx-auto block"
           />
           <p className="text-gray">
-            © {new Date().getFullYear()} Agilizei. Todos os direitos
-            reservados.
+            © {new Date().getFullYear()} Agilizei. Todos os direitos reservados.
           </p>
         </div>
-        <div>
+        <div className="text-center">
           <h2 className="text-lg font-bold mb-4">Contato</h2>
           <ul>
             <li>arsacompany.agilizei@gmail.com</li>
             <li>(27) 99982-5511</li>
           </ul>
         </div>
-        <div>
+        <div className="text-center">
           <h2 className="text-lg font-bold mb-4">Siga-nos</h2>
-          <ul className="flex space-x-4">
+          <ul className="flex space-x-4 justify-center">
             <li>
               <a
                 href="https://www.instagram.com/agilizeiapp/"
@@ -55,5 +56,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

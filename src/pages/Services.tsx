@@ -33,12 +33,14 @@ export default function Services() {
   const [servicos, setServicos] = useState<
     { id: number; nome: string; descricao: string }[]
   >([])
+  const [loading, setLoading] = useState(true)
   const [selectedServico, setSelectedServico] = useState<string | undefined>(
     undefined,
   )
 
   useEffect(() => {
     const fetchServicos = async () => {
+      setLoading(true)
       try {
         const response = await api.get('/tipos-servico')
         const tipos = response.data.data.filter(
@@ -53,6 +55,9 @@ export default function Services() {
         }
       } catch (error) {
         console.error('Erro ao buscar tipos de serviço:', error)
+        setServicos([])
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -63,6 +68,23 @@ export default function Services() {
     setSelectedServico(nomeServico)
     setClientModal('form')
   }
+
+  // Componente Skeleton para os cards de serviço
+  const ServiceCardSkeleton = () => (
+    <div className="service-card bg-orange shadow-lg p-4 rounded-lg animate-pulse flex flex-col justify-between min-h-[150px] w-full mx-auto">
+      <div className="flex justify-between items-center">
+        {/* Título do serviço */}
+        <div className="h-6 bg-white bg-opacity-30 rounded w-32"></div>
+        {/* Ícone */}
+        <div className="w-12 h-12 bg-white bg-opacity-30 rounded"></div>
+      </div>
+      {/* Descrição */}
+      <div className="space-y-2">
+        <div className="h-4 bg-white bg-opacity-30 rounded w-full"></div>
+        <div className="h-4 bg-white bg-opacity-30 rounded w-3/4"></div>
+      </div>
+    </div>
+  )
 
   return (
     <>
@@ -80,43 +102,65 @@ export default function Services() {
       </section>
 
       <section className="services grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {servicos.map((servico) => (
-          <motion.div
-            key={servico.id}
-            className={`service-card bg-orange shadow-lg p-4 rounded-lg hover:shadow-xl transition-transform transform hover:scale-105
-             flex flex-col justify-between min-h-[150px] w-full mx-auto ${
-               openMenu ? 'blur-sm pointer-events-none select-none' : ''
-             }`}
-            onClick={() => abrirFormComServico(servico.nome)}
-          >
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-white">
-                {servico.nome}
-              </h2>
-              <span>
-                {iconMap[servico.nome] ?? (
-                  <FaWrench className="text-white text-5xl" />
-                )}
-              </span>
+        {loading ? (
+          <>
+            {/* Skeletons para os serviços */}
+            {Array.from({ length: 7 }).map((_, index) => (
+              <ServiceCardSkeleton key={`skeleton-${index}`} />
+            ))}
+            {/* Skeleton para o card "Outro serviço" */}
+            <div className="service-card bg-orange shadow-lg p-4 rounded-lg animate-pulse flex flex-col justify-between min-h-[150px] w-full mx-auto">
+              <div className="flex justify-between items-center">
+                <div className="h-6 bg-white bg-opacity-30 rounded w-32"></div>
+                <div className="w-12 h-12 bg-white bg-opacity-30 rounded"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 bg-white bg-opacity-30 rounded w-full"></div>
+                <div className="h-4 bg-white bg-opacity-30 rounded w-3/4"></div>
+              </div>
             </div>
-            <p className="text-white">{servico.descricao}</p>
-          </motion.div>
-        ))}
-        <motion.div
-          className={`service-card bg-orange shadow-lg p-4 rounded-lg hover:shadow-xl transition-transform transform hover:scale-105
-           flex flex-col justify-between min-h-[150px] w-full mx-auto cursor-pointer ${
-             openMenu ? 'blur-sm pointer-events-none select-none' : ''
-           }`}
-          onClick={() => setClientModal('outros')}
-        >
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-white">Outro serviço</h2>
-            <FaWrench className="text-white text-5xl" />
-          </div>
-          <p className="text-white">
-            Não achou o serviço que procura? Fale com a gente clicando aqui!
-          </p>
-        </motion.div>
+          </>
+        ) : (
+          <>
+            {servicos.map((servico) => (
+              <motion.div
+                key={servico.id}
+                className={`service-card bg-orange shadow-lg p-4 rounded-lg hover:shadow-xl transition-transform transform hover:scale-105
+                 flex flex-col justify-between min-h-[150px] w-full mx-auto ${
+                   openMenu ? 'blur-sm pointer-events-none select-none' : ''
+                 }`}
+                onClick={() => abrirFormComServico(servico.nome)}
+              >
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-white">
+                    {servico.nome}
+                  </h2>
+                  <span>
+                    {iconMap[servico.nome] ?? (
+                      <FaWrench className="text-white text-5xl" />
+                    )}
+                  </span>
+                </div>
+                <p className="text-white">{servico.descricao}</p>
+              </motion.div>
+            ))}
+            <motion.div
+              className={`service-card bg-orange shadow-lg p-4 rounded-lg hover:shadow-xl transition-transform transform hover:scale-105
+               flex flex-col justify-between min-h-[150px] w-full mx-auto cursor-pointer ${
+                 openMenu ? 'blur-sm pointer-events-none select-none' : ''
+               }`}
+              onClick={() => setClientModal('outros')}
+            >
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-white">Outro serviço</h2>
+                <FaWrench className="text-white text-5xl" />
+              </div>
+              <p className="text-white">
+                Não achou o serviço que procura? Fale com a gente clicando aqui!
+              </p>
+            </motion.div>
+          </>
+        )}
       </section>
 
       <Button

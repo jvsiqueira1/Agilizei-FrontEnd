@@ -1,5 +1,41 @@
 import { Header, Footer } from '@/components'
 import { useMenu } from '@/contexts/useMenu'
+import { useState } from 'react'
+
+// Componente para imagem com skeleton loading
+const ImageWithSkeleton = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  return (
+    <div className={`relative ${className}`}>
+      {/* Skeleton enquanto a imagem carrega */}
+      {!imageLoaded && !imageError && (
+        <div className="absolute inset-0 bg-gray-200 rounded-lg animate-pulse">
+          <div className="w-full h-full bg-gray-300 rounded-lg"></div>
+        </div>
+      )}
+      
+      {/* Imagem real */}
+      <img
+        src={src}
+        alt={alt}
+        className={`rounded-lg w-full transition-transform duration-300 hover:scale-105 hover:shadow-lg ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageError(true)}
+      />
+      
+      {/* Fallback em caso de erro */}
+      {imageError && (
+        <div className="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
+          <span className="text-gray-500">Erro ao carregar imagem</span>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function About() {
   const { openMenu } = useMenu()
@@ -21,19 +57,18 @@ export default function About() {
             </p>
           </div>
           <div className="md:w-1/2 p-4">
-            <img
+            <ImageWithSkeleton
               src="/AGILIZE_SOBRE.jpeg"
               alt="Descrição da imagem"
-              className="rounded-lg w-full transition-transform duration-300 hover:scale-105 hover:shadow-lg"
             />
           </div>
         </section>
         <section className="flex flex-col md:flex-row items-center mb-8 bg-[#DB4E1E] p-4 rounded-lg">
           <div className="md:w-1/2 p-4 flex justify-center">
-            <img
+            <ImageWithSkeleton
               src="agilizei.png"
               alt="Descrição da imagem"
-              className="rounded-lg max-w-80 transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+              className="max-w-80"
             />
           </div>
           <div className="md:w-1/2 p-4">
