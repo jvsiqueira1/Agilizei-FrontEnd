@@ -282,7 +282,7 @@ export default function PartnerPage() {
             serviços disponíveis.
           </div>
         ) : (
-          <div className="grid grid-flow-row md:grid-flow-col md:justify-start justify-center gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full">
             {servicos.map((servico) => {
               const desabilitarBotao =
                 servico.orcamentos.some(
@@ -307,7 +307,7 @@ export default function PartnerPage() {
               return (
                 <Card
                   key={servico.id}
-                  className="max-w-lg w-full mx-auto md:min-w-[450px] min-h-[100px]"
+                  className="max-w-lg w-full mx-auto md:min-w-[450px] min-h-[100px] flex flex-col h-full"
                 >
                   <CardHeader className="flex items-center justify-between pb-2">
                     <CardTitle className="text-lg">
@@ -323,18 +323,18 @@ export default function PartnerPage() {
                     </Badge>
                   </CardHeader>
 
-                  <CardContent className="space-y-2">
+                  <CardContent className="flex flex-col flex-1">
                     <CardDescription className="text-gray-600">
                       {servico.descricao ||
                         servico.descricaoServicoPedreiro ||
                         servico.descricaoProblema ||
                         'Sem descrição'}
                     </CardDescription>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 mb-2">
                       Agendado para: {formatarData(servico.dataAgendada)}
                     </p>
 
-                    <div className="flex gap-4 mt-4">
+                    <div className="flex gap-4 mt-auto">
                       <Button onClick={() => abrirModalDetalhes(servico)}>
                         {servico.status === 'AGENDADO' &&
                         servico.profissionalId === parceiroId
@@ -346,7 +346,7 @@ export default function PartnerPage() {
                         <Button
                           onClick={() => abrirModalOrcamento(servico)}
                           disabled={desabilitarBotao}
-                          className={`text-white ${desabilitarBotao ? ' cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                          className={`text-white w-full whitespace-normal ${desabilitarBotao ? ' cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
                         >
                           {desabilitarBotao
                             ? 'Orçamento pendente ou visita técnica pendente'

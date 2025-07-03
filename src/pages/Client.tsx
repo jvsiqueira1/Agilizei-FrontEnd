@@ -264,7 +264,10 @@ export default function ClientServicesPage() {
 
         <div className="grid grid-flow-row justify-start md:grid-cols-3 gap-6 w-full">
           {servicosFiltrados.map((servico) => (
-            <Card key={servico.id} className="w-full max-w-[500px] mx-auto">
+            <Card
+              key={servico.id}
+              className="w-full max-w-[500px] mx-auto flex flex-col h-full"
+            >
               <CardHeader className="flex items-center justify-between">
                 <CardTitle>
                   {servico.descricao ||
@@ -281,7 +284,7 @@ export default function ClientServicesPage() {
                     .replace(/\b\w/g, (char) => char.toUpperCase())}
                 </Badge>
               </CardHeader>
-              <CardContent className="space-y-1 pb-2">
+              <CardContent className="flex flex-col flex-1 pb-2">
                 <p className="text-sm text-gray-600">
                   Tipo de serviço: {tipoServicoMap[servico.tipoServicoId]}
                 </p>
@@ -289,21 +292,19 @@ export default function ClientServicesPage() {
                   Agendado para: {formatarData(servico.dataAgendada)}
                 </p>
               </CardContent>
-              <CardFooter className="flex flex-col sm:flex-row gap-2 justify-end">
-                <div className="flex gap-2 mt-4">
-                  <Button onClick={() => abrirModal(servico)}>
-                    Ver detalhes
-                  </Button>
-                  {servico.status !== 'AGENDADO' &&
-                    servico.status !== 'CANCELADO' && (
-                      <Button
-                        variant="destructive"
-                        onClick={() => cancelarServico(servico.id)}
-                      >
-                        Cancelar
-                      </Button>
-                    )}
-                </div>
+              <CardFooter className="flex flex-row gap-2 justify-end mt-auto">
+                <Button onClick={() => abrirModal(servico)}>
+                  Ver detalhes
+                </Button>
+                {servico.status !== 'AGENDADO' &&
+                  servico.status !== 'CANCELADO' && (
+                    <Button
+                      variant="destructive"
+                      onClick={() => cancelarServico(servico.id)}
+                    >
+                      Cancelar
+                    </Button>
+                  )}
               </CardFooter>
             </Card>
           ))}
