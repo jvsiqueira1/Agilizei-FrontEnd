@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api } from '@/services/api'
 import { jwtDecode } from 'jwt-decode'
-import { Footer, Modal, LoginHeader } from '@/components'
+import { Footer, Modal } from '@/components'
 import {
   Card,
   CardContent,
@@ -27,7 +27,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from '@/components/ui/pagination'
-import { Loader2 } from 'lucide-react'
+import { UserCircle, Loader2, LogOut } from 'lucide-react'
 import {
   Select,
   SelectTrigger,
@@ -35,7 +35,6 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
-import { Filter } from 'lucide-react'
 
 const statusMap: Record<string, { label: string; style: string }> = {
   PENDENTE: {
@@ -356,17 +355,35 @@ export default function PartnerPage() {
     }
   }, [])
 
+  // Cabeçalho fixo e mais informativo
+  const Header = (
+    <header className="sticky top-0 z-20 bg-white shadow flex items-center justify-between px-4 py-3 mb-4 border-b border-gray-200">
+      <div className="flex items-center gap-3">
+        <UserCircle className="w-8 h-8 text-orange" />
+        <span className="font-semibold text-lg text-gray-800">
+          Bem-vindo ao portal AGILIZEI, {userName || 'Parceiro'}
+        </span>
+      </div>
+      <Button
+        className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
+        onClick={handleLogout}
+        aria-label="Sair"
+      >
+        <LogOut className="w-5 h-5" /> Sair
+      </Button>
+    </header>
+  )
+
   return (
     <>
-      <LoginHeader nome={userName || 'Parceiro'} isCliente={false} onLogout={handleLogout} />
+      {Header}
       <div className="w-full max-w-[1440px] mx-auto bg-light-gray flex flex-col py-2 px-4 min-h-screen">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 my-4">
           <h1 className="text-2xl font-bold">Serviços disponíveis</h1>
           <div className="w-full sm:max-w-xs md:w-auto flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-500" aria-label="Filtro" />
             <label htmlFor="status-select" className="block mb-1 font-medium md:sr-only">Filtrar por status:</label>
             <Select value={selectedStatus} onValueChange={value => { setSelectedStatus(value); setPage(1); }}>
-              <SelectTrigger id="status-select" className="w-full md:min-w-[180px] border border-gray-300 focus:border-gray-400">
+              <SelectTrigger id="status-select" className="w-full md:min-w-[180px] border border-gray-300 focus:border-orange">
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
               <SelectContent>
@@ -380,18 +397,18 @@ export default function PartnerPage() {
 
         {parceiroInativo ? (
           <div className="bg-red-100 text-red-700 border border-red-300 p-4 rounded max-w-xl mx-auto text-center">
-            Seu perfil está inativo. Aguarde a aprovação para visualizar os
-            serviços disponíveis.
+            Seu perfil está inativo. Aguarde a aprovação para visualizar os serviços disponíveis.
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full justify-center">
               {loading ? (
-                <div className="flex justify-center items-center w-full col-span-3 min-h-[200px]">
-                  <Loader2 className="animate-spin w-10 h-10 text-primary" />
+                <div className="flex flex-col justify-center items-center w-full col-span-3 min-h-[200px] gap-2">
+                  <Loader2 className="animate-spin w-12 h-12 text-orange" />
+                  <span className="text-orange font-medium">Carregando serviços...</span>
                 </div>
               ) : servicos.length === 0 ? (
-                <div className="bg-yellow-100 text-yellow-700 border border-yellow-300 p-4 rounded max-w-xl mx-auto text-center col-span-3">
+                <div className="bg-yellow-100 text-yellow-700 border border-yellow-300 p-6 rounded max-w-xl mx-auto text-center col-span-3">
                   Nenhum serviço encontrado para o status selecionado.
                 </div>
               ) : (
@@ -419,49 +436,51 @@ export default function PartnerPage() {
                   return (
                     <Card
                       key={servico.id}
-                      className="max-w-lg w-full mx-auto md:min-w-[450px] min-h-[100px] flex flex-col h-full"
+                      className="max-w-lg w-full mx-auto md:min-w-[450px] min-h-[100px] flex flex-col h-full shadow-lg border border-gray-200 bg-white transition hover:shadow-2xl rounded-xl"
                     >
-                      <CardHeader className="flex items-center justify-between pb-2">
-                        <CardTitle className="text-lg">
-                          {tipoServicoMap[Number(servico.tipoServicoId)]}
-                        </CardTitle>
+                      <CardHeader className="flex items-center justify-between pb-2 gap-2">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">
+                            {tipoServicoMap[Number(servico.tipoServicoId)]}
+                          </CardTitle>
+                        </div>
                         <Badge
-                          className={`${statusMap[servico.status]?.style} min-w-[120px] w-[120px] flex justify-center items-center text-center px-3 py-1`}
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${statusMap[servico.status]?.style}`}
                         >
-                          {servico.status
-                            .replace(/_/g, ' ')
-                            .toLowerCase()
-                            .replace(/\b\w/g, (char) => char.toUpperCase())}
+                          {statusMap[servico.status]?.label}
                         </Badge>
                       </CardHeader>
 
-                      <CardContent className="flex flex-col flex-1">
-                        <CardDescription className="text-gray-600">
+                      <CardContent className="flex flex-col flex-1 gap-2">
+                        <CardDescription className="text-gray-600 mb-1">
                           {servico.descricao ||
                             servico.descricaoServicoPedreiro ||
                             servico.descricaoProblema ||
                             'Sem descrição'}
                         </CardDescription>
-                        <p className="text-sm text-gray-500 mb-2">
-                          Agendado para: {formatarData(servico.dataAgendada)}
-                        </p>
-
+                        <div className="text-sm text-gray-500">
+                          <span className="font-medium">Agendado para:</span> {formatarData(servico.dataAgendada)}
+                        </div>
+                        {(servico.status === 'AGENDADO' || servico.status === 'CONCLUIDO') && (
+                          <div className="text-sm text-gray-500">
+                            <span className="font-medium">Cliente:</span> {servico.nome}
+                          </div>
+                        )}
                         <div className="flex gap-4 mt-auto">
-                          <Button onClick={() => abrirModalDetalhes(servico)}>
-                            {servico.status === 'AGENDADO' &&
-                            servico.profissionalId === parceiroId
+                          <Button onClick={() => abrirModalDetalhes(servico)} className="flex-1 bg-orange text-white hover:bg-orange/80">
+                            {servico.status === 'AGENDADO' && servico.profissionalId === parceiroId
                               ? 'Ver detalhes do serviço'
                               : 'Ver detalhes'}
                           </Button>
-
                           {mostrarBotao && (
                             <Button
                               onClick={() => abrirModalOrcamento(servico)}
                               disabled={desabilitarBotao}
-                              className={`text-white w-full whitespace-normal ${desabilitarBotao ? ' cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                              className={`flex-1 ${desabilitarBotao ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                              title={desabilitarBotao ? 'Você já possui orçamento ou visita técnica pendente para este serviço.' : 'Enviar orçamento'}
                             >
                               {desabilitarBotao
-                                ? 'Orçamento pendente ou visita técnica pendente'
+                                ? 'Orçamento/visita pendente'
                                 : 'Enviar orçamento'}
                             </Button>
                           )}
@@ -474,14 +493,13 @@ export default function PartnerPage() {
             </div>
             {/* PAGINAÇÃO */}
             {totalPages > 1 && (
-              <Pagination className="mt-8">
+              <Pagination className="mt-8 flex justify-center">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       aria-disabled={page === 1}
                       tabIndex={page === 1 ? -1 : 0}
-                      href={`#${page}`}
                     />
                   </PaginationItem>
                   {Array.from({ length: totalPages }).map((_, idx) => (
@@ -515,7 +533,12 @@ export default function PartnerPage() {
         >
           {servicoSelecionado && (
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold">Detalhes do Serviço</h2>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Detalhes do Serviço</h2>
+                <Button variant="ghost" size="icon" onClick={() => setModalDetalhesAberto(false)} aria-label="Fechar">
+                  X
+                </Button>
+              </div>
               {servicoSelecionado.foto && (
                 <img
                   src={`${import.meta.env.VITE_BASE_URL}/uploads/${servicoSelecionado.foto}`}
@@ -577,6 +600,7 @@ export default function PartnerPage() {
                       })
                     }
                   }}
+                  className="bg-green-600 text-white hover:bg-green-700 mt-2"
                 >
                   Confirmar visita técnica realizada
                 </Button>
@@ -587,7 +611,7 @@ export default function PartnerPage() {
               servicoSelecionado.orcamentos.some(
                 (orc) => orc.status === 'VISITA_TECNICA_CONFIRMADA',
               ) ? (
-                <>
+                <div className="mt-2 space-y-1">
                   <p>
                     <strong>Cliente:</strong> {servicoSelecionado.nome}
                   </p>
@@ -598,7 +622,7 @@ export default function PartnerPage() {
                     <strong>Endereço:</strong>{' '}
                     {`${servicoSelecionado.logradouro}, ${servicoSelecionado.numero}, ${servicoSelecionado.bairro}, ${servicoSelecionado.cidade} - ${servicoSelecionado.estado}`}
                   </p>
-                </>
+                </div>
               ) : null}
 
               {/* Exibe detalhes extras */}
@@ -633,25 +657,22 @@ export default function PartnerPage() {
         >
           {servicoSelecionado && (
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Enviar orçamento</h2>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Enviar orçamento</h2>
+                <Button variant="ghost" size="icon" onClick={() => setModalOrcamentoAberto(false)} aria-label="Fechar">
+                  X
+                </Button>
+              </div>
 
-              <div
-                className="flex items-center gap-2"
-                style={{
-                  display: (servicoSelecionado?.orcamentos || []).some(
-                    (orc) => orc.status === 'VISITA_TECNICA_REALIZADA',
-                  )
-                    ? 'none' // Esconde completamente a div quando o status for "AGUARDANDO_ENVIO_ORCAMENTO"
-                    : 'block', // Exibe normalmente quando o status não for "AGUARDANDO_ENVIO_ORCAMENTO"
-                }}
-              >
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="visitaTecnica"
                   checked={precisaVisitaTecnica}
                   onChange={(e) => setPrecisaVisitaTecnica(e.target.checked)}
+                  className="accent-orange"
                 />
-                <label htmlFor="visitaTecnica" className="ml-1">
+                <label htmlFor="visitaTecnica" className="ml-1 text-sm">
                   Precisa de visita técnica?
                 </label>
               </div>
@@ -659,38 +680,46 @@ export default function PartnerPage() {
               {/* Mostrar input de data da visita se marcada */}
               {precisaVisitaTecnica &&
                 !servicoSelecionado?.visitaTecnicaRealizada && (
-                  <>
-                    <p>Selecione a data da visita técnica</p>
+                  <div className="flex flex-col gap-1">
+                    <label htmlFor="dataVisita" className="text-sm font-medium">Selecione a data da visita técnica</label>
                     <DayPicker
                       value={dataVisitaTecnica}
                       onChange={setDataVisitaTecnica}
                     />
-                  </>
+                  </div>
                 )}
 
               {/* Mostrar input de valor somente se NÃO precisa visita técnica */}
               {!precisaVisitaTecnica && (
-                <IMaskInput
-                  mask={Number}
-                  scale={2}
-                  thousandsSeparator="."
-                  padFractionalZeros={true}
-                  normalizeZeros={true}
-                  radix=","
-                  mapToRadix={['.']}
-                  placeholder="Valor (R$)"
-                  className="w-full border border-orange rounded px-3 py-2"
-                  value={valor}
-                  onAccept={(value) => setValor(value)}
-                />
+                <div className="flex flex-col gap-1">
+                  <label htmlFor="valorOrcamento" className="text-sm font-medium">Valor (R$)</label>
+                  <IMaskInput
+                    mask={Number}
+                    scale={2}
+                    thousandsSeparator="."
+                    padFractionalZeros={true}
+                    normalizeZeros={true}
+                    radix="," 
+                    mapToRadix={['.']}
+                    placeholder="Informe o valor do orçamento"
+                    className="w-full border border-orange rounded px-3 py-2"
+                    value={valor}
+                    onAccept={(value) => setValor(value)}
+                    id="valorOrcamento"
+                  />
+                </div>
               )}
 
-              <textarea
-                placeholder="Descrição"
-                className="w-full border border-orange rounded px-3 py-2"
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-              />
+              <div className="flex flex-col gap-1">
+                <label htmlFor="descricaoOrcamento" className="text-sm font-medium">Descrição</label>
+                <textarea
+                  id="descricaoOrcamento"
+                  placeholder="Descreva o serviço, condições, etc."
+                  className="w-full border border-orange rounded px-3 py-2"
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                />
+              </div>
 
               <Button
                 onClick={() => {
@@ -713,7 +742,7 @@ export default function PartnerPage() {
                     title: 'Orçamento enviado com sucesso!',
                   })
                 }}
-                className="w-full"
+                className="w-full bg-green-600 text-white hover:bg-green-700"
               >
                 {servicoSelecionado &&
                   ((servicoSelecionado.orcamentos || []).some(

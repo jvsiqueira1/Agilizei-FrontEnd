@@ -67,22 +67,7 @@ export function AuthProvider({ children }: Props) {
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const decodedToken: any = jwtDecode(token)
-    const tipos = Array.isArray(decodedToken.tipos) ? decodedToken.tipos : []
-    let role: UserRole | null = null
-    const path = window.location.pathname
-    if (path.includes('/parceiro') && tipos.includes('parceiro')) {
-      role = 'partner'
-    } else if (path.includes('/cliente') && tipos.includes('cliente')) {
-      role = 'client'
-    } else if (tipos.includes('admin')) {
-      role = 'admin'
-    } else if (tipos.includes('parceiro')) {
-      role = 'partner'
-    } else if (tipos.includes('cliente')) {
-      role = 'client'
-    } else {
-      role = null
-    }
+    const role: UserRole = _role
     const id = decodedToken.id || null
     const nome = Cookies.get('nome') || decodedToken.nome || null
     const telefone = decodedToken.telefone || null

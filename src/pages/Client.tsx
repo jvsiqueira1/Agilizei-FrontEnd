@@ -7,7 +7,6 @@ import { formatarData } from '@/lib/formatData'
 import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/useAuth'
 import { useToast } from '../components/hooks/use-toast'
-import { LoginHeader } from '@/components'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -25,7 +24,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from '@/components/ui/pagination'
-import { Loader2 } from 'lucide-react'
+import { UserCircle, Loader2 } from 'lucide-react'
 import {
   Select,
   SelectTrigger,
@@ -33,7 +32,6 @@ import {
   SelectItem,
   SelectValue,
 } from '@/components/ui/select'
-import { Filter } from 'lucide-react'
 
 const tipoServicoMap: Record<number, string> = {
   1: 'Faxineira',
@@ -306,23 +304,35 @@ export default function ClientServicesPage() {
   const handleStartLoading = () => setLoading(true)
   const handleStopLoading = () => setLoading(false)
 
+  // Cabeçalho fixo e mais informativo
+  const Header = (
+    <header className="sticky top-0 z-20 bg-white shadow flex items-center justify-between px-4 py-3 mb-4 border-b border-gray-200">
+      <div className="flex items-center gap-3">
+        <UserCircle className="w-8 h-8 text-orange" />
+        <span className="font-semibold text-lg text-gray-800">
+          Bem-vindo ao portal AGILIZEI, {userName || 'Usuário'}
+        </span>
+      </div>
+      <Button
+        className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
+        onClick={handleLogout}
+        aria-label="Sair"
+      >
+        Sair
+      </Button>
+    </header>
+  )
+
   return (
     <>
-      <LoginHeader
-        nome={userName || 'Usuário'}
-        isCliente={true}
-        onNovoServico={() => setModalCadastroAberto(true)}
-        onLogout={handleLogout}
-      />
-
+      {Header}
       <div className="w-full max-w-[1440px] mx-auto bg-light-gray flex flex-col py-2 px-4 min-h-screen">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 my-4">
           <h1 className="text-2xl font-bold">Meus serviços</h1>
           <div className="w-full sm:max-w-xs md:w-auto flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-500" aria-label="Filtro" />
             <label htmlFor="status-select" className="block mb-1 font-medium md:sr-only">Filtrar por status:</label>
             <Select value={selectedStatus} onValueChange={value => { setSelectedStatus(value); setPage(1); }}>
-              <SelectTrigger id="status-select" className="w-full md:min-w-[180px] border border-gray-300 focus:border-gray-400">
+              <SelectTrigger id="status-select" className="w-full md:min-w-[180px] border border-gray-300 focus:border-orange">
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
               <SelectContent>
@@ -336,11 +346,12 @@ export default function ClientServicesPage() {
 
         <div className="grid grid-flow-row justify-center md:grid-cols-3 gap-6 w-full">
           {loading ? (
-            <div className="flex justify-center items-center w-full col-span-3 min-h-[200px]">
-              <Loader2 className="animate-spin w-10 h-10 text-primary" />
+            <div className="flex flex-col justify-center items-center w-full col-span-3 min-h-[200px] gap-2">
+              <Loader2 className="animate-spin w-12 h-12 text-orange" />
+              <span className="text-orange font-medium">Carregando serviços...</span>
             </div>
           ) : servicos.length === 0 ? (
-            <div className="bg-yellow-100 text-yellow-700 border border-yellow-300 p-4 rounded max-w-xl mx-auto text-center col-span-3">
+            <div className="bg-yellow-100 text-yellow-700 border border-yellow-300 p-6 rounded max-w-xl mx-auto text-center col-span-3">
               Nenhum serviço encontrado para o status selecionado.
             </div>
           ) : (
@@ -386,6 +397,7 @@ export default function ClientServicesPage() {
                       variant="destructive"
                       onClick={() => cancelarServico(servico.id)}
                       className="flex-1"
+                      title="Cancelar serviço"
                     >
                       Cancelar
                     </Button>
@@ -398,14 +410,13 @@ export default function ClientServicesPage() {
 
         {/* PAGINAÇÃO */}
         {typeof totalPages === 'number' && totalPages > 1 && (
-          <Pagination className="mt-8">
+          <Pagination className="mt-8 flex justify-center">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   aria-disabled={page === 1}
                   tabIndex={page === 1 ? -1 : 0}
-                  href={`#${page}`}
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }).map((_, idx) => (
