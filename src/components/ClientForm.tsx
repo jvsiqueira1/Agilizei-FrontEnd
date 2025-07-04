@@ -51,6 +51,8 @@ interface Props {
   telefone?: string
   onClose: () => void
   selectedServico?: string
+  onStartLoading?: () => void
+  onStopLoading?: () => void
 }
 
 interface Cliente {
@@ -63,6 +65,8 @@ export default function ClientForm({
   telefone,
   onClose,
   selectedServico,
+  onStartLoading,
+  onStopLoading,
 }: Props) {
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -265,7 +269,7 @@ export default function ClientForm({
   }
 
   const onSubmit = async (data: ClientFormData) => {
-    console.log(data.dataAgendada)
+    if (onStartLoading) onStartLoading()
     try {
       const formData = prepareFormData(data)
       // Limpa o telefone para remover caracteres especiais
@@ -362,6 +366,8 @@ export default function ClientForm({
       toast({
         title: 'Ocorreu um erro ao processar sua solicitação',
       })
+    } finally {
+      if (onStopLoading) onStopLoading()
     }
   }
 

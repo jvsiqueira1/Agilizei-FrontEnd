@@ -9,16 +9,31 @@ import { useAuth } from '@/contexts/useAuth'
 import { useToast } from '../components/hooks/use-toast'
 import { LoginHeader } from '@/components'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
 } from '@/components/ui/card'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from '@/components/ui/pagination'
+import { Loader2 } from 'lucide-react'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select'
+import { Filter } from 'lucide-react'
 
 const tipoServicoMap: Record<number, string> = {
   1: 'Faxineira',
@@ -168,18 +183,27 @@ function TipoServicoDetalhes({ servico }: { servico: Servico }) {
   )
 }
 
+function useResponsiveLimit() {
+  const [limit, setLimit] = useState(window.innerWidth < 640 ? 5 : 9)
+  useEffect(() => {
+    function handleResize() {
+      setLimit(window.innerWidth < 640 ? 5 : 9)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+  return limit
+}
+
 export default function ClientServicesPage() {
-  const [abaAtiva, setAbaAtiva] = useState<'em_andamento' | 'finalizado'>(
-    'em_andamento',
-  )
   const [modalAberto, setModalAberto] = useState(false)
   const [modalCadastroAberto, setModalCadastroAberto] = useState(false)
   const [servicoSelecionado, setServicoSelecionado] = useState<Servico | null>(
     null,
   )
-  const [servicos, setServicos] = useState<Servico[]>([])
-  const [telefoneLogado, setTelefoneLogado] = useState<string>('')
-  const [userName, setUserName] = useState('')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const limit = useResponsiveLimit() // Serviços por página
 
   const navigate = useNavigate()
   const { logout } = useAuth()
@@ -192,39 +216,57 @@ export default function ClientServicesPage() {
     navigate('/')
   }
 
-  useEffect(() => {
-    carregarServicos()
-  }, [])
+  const [telefoneLogado, setTelefoneLogado] = useState<string>('')
+  const [userName, setUserName] = useState('')
 
-  const carregarServicos = async () => {
+  const [servicos, setServicos] = useState<Servico[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const statusOptions = [
+    { value: 'PENDENTE', label: 'Pendente' },
+    { value: 'AGENDADO', label: 'Agendado' },
+    { value: 'CANCELADO', label: 'Cancelado' },
+  ]
+
+  const [selectedStatus, setSelectedStatus] = useState('PENDENTE')
+
+  const carregarServicosPaginados = async (page: number) => {
     try {
+      setLoading(true)
       const token = Cookies.get('token')
       if (!token) return
       const decoded = jwtDecode<JwtPayload>(token)
-      const response = await api.get(`/servicos/cliente/${decoded.id}`)
+      const response = await api.get(`/servicos/cliente/${decoded.id}?page=${page}&limit=${limit}&statusList=${selectedStatus}`)
       setTelefoneLogado(decoded.telefone)
-      setServicos(response.data)
+      const data = Array.isArray(response.data.servicos)
+        ? response.data.servicos
+        : Array.isArray(response.data)
+        ? response.data
+        : []
+      setServicos(data)
+      setTotalPages(response.data.totalPages || 1)
     } catch (error) {
       console.error('Erro ao carregar serviços:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const atualizarServicosEReiniciarPaginacao = async () => {
+    await carregarServicosPaginados(1)
+    setPage(1)
   }
 
   const cancelarServico = async (servicoId: string) => {
     try {
       await api.put(`/servicos/${servicoId}`, { status: 'CANCELADO' })
       toast({ variant: 'default', title: 'Serviço cancelado com sucesso!' })
-      carregarServicos()
+      atualizarServicosEReiniciarPaginacao()
     } catch (error) {
       toast({ title: 'Erro ao cancelar o serviço.' })
       console.error(error)
     }
   }
-
-  const servicosFiltrados = servicos.filter((s) =>
-    abaAtiva === 'em_andamento'
-      ? s.status !== 'CONCLUIDO' && s.status !== 'CANCELADO'
-      : s.status === 'CONCLUIDO' || s.status === 'CANCELADO',
-  )
 
   const abrirModal = (servico: Servico) => {
     setServicoSelecionado(servico)
@@ -233,82 +275,160 @@ export default function ClientServicesPage() {
 
   useEffect(() => {
     const nomeCookie = Cookies.get('nome')
-    if (nomeCookie) setUserName(nomeCookie)
+    if (nomeCookie) {
+      setUserName(nomeCookie)
+    } else {
+      // Buscar nome do backend se não houver cookie
+      const token = Cookies.get('token')
+      if (token) {
+        try {
+          const decoded = jwtDecode<JwtPayload>(token)
+          api.get(`/clientes/${decoded.id}`).then(res => {
+            const nome = res.data?.nome || res.data?.data?.nome
+            if (nome) {
+              setUserName(nome)
+              Cookies.set('nome', nome)
+            }
+          })
+        } catch {
+          // ignore
+        }
+      }
+    }
   }, [])
+
+  useEffect(() => {
+    carregarServicosPaginados(page)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, selectedStatus, limit])
+
+  // Função para ser passada ao ClientForm para controlar loading
+  const handleStartLoading = () => setLoading(true)
+  const handleStopLoading = () => setLoading(false)
 
   return (
     <>
       <LoginHeader
-        nome={userName}
+        nome={userName || 'Usuário'}
         isCliente={true}
         onNovoServico={() => setModalCadastroAberto(true)}
         onLogout={handleLogout}
       />
 
       <div className="w-full max-w-[1440px] mx-auto bg-light-gray flex flex-col py-2 px-4 min-h-screen">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold my-4">Meus serviços</h1>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 my-4">
+          <h1 className="text-2xl font-bold">Meus serviços</h1>
+          <div className="w-full sm:max-w-xs md:w-auto flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-500" aria-label="Filtro" />
+            <label htmlFor="status-select" className="block mb-1 font-medium md:sr-only">Filtrar por status:</label>
+            <Select value={selectedStatus} onValueChange={value => { setSelectedStatus(value); setPage(1); }}>
+              <SelectTrigger id="status-select" className="w-full md:min-w-[180px] border border-gray-300 focus:border-gray-400">
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <Tabs
-          value={abaAtiva}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onValueChange={(v) => setAbaAtiva(v as any)}
-          className="mb-6"
-        >
-          <TabsList className="flex gap-2">
-            <TabsTrigger value="em_andamento">Em andamento</TabsTrigger>
-            <TabsTrigger value="finalizado">Finalizado</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="grid grid-flow-row justify-start md:grid-cols-3 gap-6 w-full">
-          {servicosFiltrados.map((servico) => (
-            <Card
-              key={servico.id}
-              className="w-full max-w-[500px] mx-auto flex flex-col h-full"
-            >
-              <CardHeader className="flex items-center justify-between">
-                <CardTitle>
-                  {servico.descricao ||
-                    servico.descricaoProblema ||
-                    servico.descricaoServicoPedreiro ||
-                    'Sem descrição'}
-                </CardTitle>
-                <Badge
-                  className={`${statusMap[servico.status]?.style} min-w-[120px] w-[120px] flex justify-center items-center text-center px-3 py-1`}
-                >
-                  {servico.status
-                    .replace(/_/g, ' ')
-                    .toLowerCase()
-                    .replace(/\b\w/g, (char) => char.toUpperCase())}
-                </Badge>
-              </CardHeader>
-              <CardContent className="flex flex-col flex-1 pb-2">
-                <p className="text-sm text-gray-600">
-                  Tipo de serviço: {tipoServicoMap[servico.tipoServicoId]}
-                </p>
-                <p className="text-sm text-gray-400">
-                  Agendado para: {formatarData(servico.dataAgendada)}
-                </p>
-              </CardContent>
-              <CardFooter className="flex flex-row gap-2 justify-end mt-auto">
-                <Button onClick={() => abrirModal(servico)}>
-                  Ver detalhes
-                </Button>
-                {servico.status !== 'AGENDADO' &&
-                  servico.status !== 'CANCELADO' && (
+        <div className="grid grid-flow-row justify-center md:grid-cols-3 gap-6 w-full">
+          {loading ? (
+            <div className="flex justify-center items-center w-full col-span-3 min-h-[200px]">
+              <Loader2 className="animate-spin w-10 h-10 text-primary" />
+            </div>
+          ) : servicos.length === 0 ? (
+            <div className="bg-yellow-100 text-yellow-700 border border-yellow-300 p-4 rounded max-w-xl mx-auto text-center col-span-3">
+              Nenhum serviço encontrado para o status selecionado.
+            </div>
+          ) : (
+            servicos.map((servico) => (
+              <Card
+                key={servico.id}
+                className="w-full max-w-[400px] mx-auto flex flex-col h-full shadow-lg rounded-xl border border-gray-200 bg-white transition hover:shadow-2xl"
+              >
+                <CardHeader className="flex flex-col items-start gap-2 pb-2">
+                  <div className="flex items-center gap-2 w-full">
+                    <span className="text-lg font-bold truncate flex-1">
+                      {servico.descricao ||
+                        servico.descricaoProblema ||
+                        servico.descricaoServicoPedreiro ||
+                        'Sem descrição'}
+                    </span>
+                    <Badge
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${statusMap[servico.status]?.style}`}
+                    >
+                      {statusMap[servico.status]?.label}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-gray-500 font-medium">
+                    {tipoServicoMap[servico.tipoServicoId]}
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-1 flex-1 pb-2">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="font-medium">Agendado para:</span>
+                    <span>{formatarData(servico.dataAgendada)}</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-row gap-2 justify-between mt-auto">
+                  <Button
+                    onClick={() => abrirModal(servico)}
+                    className="flex-1 bg-orange text-white hover:bg-orange/80 hover:text-white"
+                    variant="outline"
+                  >
+                    Ver detalhes
+                  </Button>
+                  {servico.status !== 'AGENDADO' && servico.status !== 'CANCELADO' && (
                     <Button
                       variant="destructive"
                       onClick={() => cancelarServico(servico.id)}
+                      className="flex-1"
                     >
                       Cancelar
                     </Button>
                   )}
-              </CardFooter>
-            </Card>
-          ))}
+                </CardFooter>
+              </Card>
+            ))
+          )}
         </div>
+
+        {/* PAGINAÇÃO */}
+        {typeof totalPages === 'number' && totalPages > 1 && (
+          <Pagination className="mt-8">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  aria-disabled={page === 1}
+                  tabIndex={page === 1 ? -1 : 0}
+                  href={`#${page}`}
+                />
+              </PaginationItem>
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <PaginationItem key={idx}>
+                  <PaginationLink
+                    isActive={page === idx + 1}
+                    onClick={() => setPage(idx + 1)}
+                    className="border-black cursor-pointer"
+                  >
+                    {idx + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  aria-disabled={page === totalPages}
+                  tabIndex={page === totalPages ? -1 : 0}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
 
         {/* MODAL DETALHES */}
         <Modal isVisible={modalAberto} onClose={() => setModalAberto(false)}>
@@ -401,7 +521,7 @@ export default function ClientServicesPage() {
                                           'Visita técnica aprovada com sucesso!',
                                       })
                                       setModalAberto(false)
-                                      carregarServicos()
+                                      atualizarServicosEReiniciarPaginacao()
                                     } catch {
                                       toast({
                                         title:
@@ -472,7 +592,7 @@ export default function ClientServicesPage() {
                                             'Orçamento aprovado com sucesso!',
                                         })
                                         setModalAberto(false)
-                                        carregarServicos()
+                                        atualizarServicosEReiniciarPaginacao()
                                       } catch {
                                         toast({
                                           title: 'Erro ao aprovar orçamento.',
@@ -502,15 +622,20 @@ export default function ClientServicesPage() {
         {/* MODAL DE CADASTRO */}
         <Modal
           isVisible={modalCadastroAberto}
-          onClose={() => setModalCadastroAberto(false)}
+          onClose={() => {
+            setModalCadastroAberto(false)
+            atualizarServicosEReiniciarPaginacao()
+          }}
         >
           <ErrorBoundary>
             <ClientForm
               telefone={telefoneLogado}
               onClose={() => {
                 setModalCadastroAberto(false)
-                carregarServicos()
+                atualizarServicosEReiniciarPaginacao()
               }}
+              onStartLoading={handleStartLoading}
+              onStopLoading={handleStopLoading}
             />
           </ErrorBoundary>
         </Modal>
