@@ -9,12 +9,7 @@ import { useAuth } from '@/contexts/useAuth'
 import { useToast } from '../components/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from '@/components/ui/card'
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import {
   Pagination,
@@ -24,7 +19,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from '@/components/ui/pagination'
-import { UserCircle, Loader2 } from 'lucide-react'
+import { UserCircle, Loader2, LogOut } from 'lucide-react'
 import {
   Select,
   SelectTrigger,
@@ -234,13 +229,15 @@ export default function ClientServicesPage() {
       const token = Cookies.get('token')
       if (!token) return
       const decoded = jwtDecode<JwtPayload>(token)
-      const response = await api.get(`/servicos/cliente/${decoded.id}?page=${page}&limit=${limit}&statusList=${selectedStatus}`)
+      const response = await api.get(
+        `/servicos/cliente/${decoded.id}?page=${page}&limit=${limit}&statusList=${selectedStatus}`,
+      )
       setTelefoneLogado(decoded.telefone)
       const data = Array.isArray(response.data.servicos)
         ? response.data.servicos
         : Array.isArray(response.data)
-        ? response.data
-        : []
+          ? response.data
+          : []
       setServicos(data)
       setTotalPages(response.data.totalPages || 1)
     } catch (error) {
@@ -281,7 +278,7 @@ export default function ClientServicesPage() {
       if (token) {
         try {
           const decoded = jwtDecode<JwtPayload>(token)
-          api.get(`/clientes/${decoded.id}`).then(res => {
+          api.get(`/clientes/${decoded.id}`).then((res) => {
             const nome = res.data?.nome || res.data?.data?.nome
             if (nome) {
               setUserName(nome)
@@ -297,7 +294,7 @@ export default function ClientServicesPage() {
 
   useEffect(() => {
     carregarServicosPaginados(page)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, selectedStatus, limit])
 
   // Função para ser passada ao ClientForm para controlar loading
@@ -313,13 +310,22 @@ export default function ClientServicesPage() {
           Bem-vindo ao portal AGILIZEI, {userName || 'Usuário'}
         </span>
       </div>
-      <Button
-        className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
-        onClick={handleLogout}
-        aria-label="Sair"
-      >
-        Sair
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          className="flex items-center gap-2 bg-green-600 text-white hover:bg-green-700"
+          onClick={() => setModalCadastroAberto(true)}
+          aria-label="Novo serviço"
+        >
+          Novo serviço
+        </Button>
+        <Button
+          className="flex items-center gap-2 bg-red-600 text-white hover:bg-red-700"
+          onClick={handleLogout}
+          aria-label="Sair"
+        >
+          <LogOut className="w-5 h-5" /> Sair
+        </Button>
+      </div>
     </header>
   )
 
@@ -330,14 +336,30 @@ export default function ClientServicesPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 my-4">
           <h1 className="text-2xl font-bold">Meus serviços</h1>
           <div className="w-full sm:max-w-xs md:w-auto flex items-center gap-2">
-            <label htmlFor="status-select" className="block mb-1 font-medium md:sr-only">Filtrar por status:</label>
-            <Select value={selectedStatus} onValueChange={value => { setSelectedStatus(value); setPage(1); }}>
-              <SelectTrigger id="status-select" className="w-full md:min-w-[180px] border border-gray-300 focus:border-orange">
+            <label
+              htmlFor="status-select"
+              className="block mb-1 font-medium md:sr-only"
+            >
+              Filtrar por status:
+            </label>
+            <Select
+              value={selectedStatus}
+              onValueChange={(value) => {
+                setSelectedStatus(value)
+                setPage(1)
+              }}
+            >
+              <SelectTrigger
+                id="status-select"
+                className="w-full md:min-w-[180px] border border-gray-300 focus:border-orange"
+              >
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
               <SelectContent>
-                {statusOptions.map(opt => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                {statusOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -348,7 +370,9 @@ export default function ClientServicesPage() {
           {loading ? (
             <div className="flex flex-col justify-center items-center w-full col-span-3 min-h-[200px] gap-2">
               <Loader2 className="animate-spin w-12 h-12 text-orange" />
-              <span className="text-orange font-medium">Carregando serviços...</span>
+              <span className="text-orange font-medium">
+                Carregando serviços...
+              </span>
             </div>
           ) : servicos.length === 0 ? (
             <div className="bg-yellow-100 text-yellow-700 border border-yellow-300 p-6 rounded max-w-xl mx-auto text-center col-span-3">
@@ -392,16 +416,17 @@ export default function ClientServicesPage() {
                   >
                     Ver detalhes
                   </Button>
-                  {servico.status !== 'AGENDADO' && servico.status !== 'CANCELADO' && (
-                    <Button
-                      variant="destructive"
-                      onClick={() => cancelarServico(servico.id)}
-                      className="flex-1"
-                      title="Cancelar serviço"
-                    >
-                      Cancelar
-                    </Button>
-                  )}
+                  {servico.status !== 'AGENDADO' &&
+                    servico.status !== 'CANCELADO' && (
+                      <Button
+                        variant="destructive"
+                        onClick={() => cancelarServico(servico.id)}
+                        className="flex-1"
+                        title="Cancelar serviço"
+                      >
+                        Cancelar
+                      </Button>
+                    )}
                 </CardFooter>
               </Card>
             ))
